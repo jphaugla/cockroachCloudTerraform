@@ -1,0 +1,6 @@
+[app_node_ips]
+3.135.186.163 ansible_user=ec2-user 
+[all_public_node_ips]
+3.135.186.163 ansible_user=ec2-user
+[all:vars]
+ansible_connection=ssh

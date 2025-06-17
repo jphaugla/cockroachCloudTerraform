@@ -12,7 +12,7 @@ resource "aws_vpc_endpoint" "crdb" {
   security_group_ids = [module.sg_application.security_group_id]
 
   # (Optional) Enable private DNS so your EC2s can resolve the cluster host by its normal hostname
-  # private_dns_enabled = true
+  private_dns_enabled = true
 }
 
 data "aws_caller_identity" "me" {}

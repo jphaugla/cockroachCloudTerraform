@@ -15,10 +15,15 @@ output "admin_ui_endpoint" {
   value       = cockroach_cluster.advanced.regions[0].ui_dns
 }
 
-# You can drop the data block entirely if you want, and reference the resource directly:
-# output "crdb_private_endpoint_dns" {
-#   value = cockroach_cluster.advanced.sql_dns
-# }
+output "crdb_private_endpoint_dns" {
+  description = "internal dns connection string"
+  value = cockroach_cluster.advanced.regions[0].internal_dns
+}
+
+output "crdb_public_endpoint_dns" {
+  description = "public dns connection string"
+  value = cockroach_cluster.advanced.regions[0].sql_dns
+}
 
 # — OR — if you prefer using a data source:
  data "cockroach_cluster" "advanced_fetch" {

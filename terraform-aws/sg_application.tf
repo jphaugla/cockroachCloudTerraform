@@ -29,6 +29,16 @@ module "sg_application" {
       description = "Allow application port 3000 from trusted IPs"
     },
   ]
+# NEW: allow CockroachDB PrivateLink (port 26257) from any host in this SG
+  ingress_with_source_security_group_id = [
+    {
+      from_port                = 26257
+      to_port                  = 26257
+      protocol                 = "tcp"
+      source_security_group_id = module.sg_application.security_group_id
+      description              = "Allow CRDB SQL (26257) from app hosts"
+    }
+  ]
 
   egress_rules = ["all-all"]
 }

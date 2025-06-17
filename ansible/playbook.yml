@@ -1,0 +1,12 @@
+- hosts: all_public_node_ips
+  gather_facts: True
+  roles:
+    - common
+- hosts: app_node_ips
+  gather_facts: True
+  roles:
+    - app-node
+- hosts: app_node_ips
+  gather_facts: True
+  roles:
+    - replicator-molt

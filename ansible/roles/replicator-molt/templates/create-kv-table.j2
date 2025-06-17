@@ -1,0 +1,2 @@
+export CONNECT='postgresql://{{ db_admin_user }}:{{ db_admin_password }}@{{load_balancer_private_ip}}:26257/bank?sslmode=verify-full&sslrootcert=/home/{{ login_username }}/certs/ca.crt'
+/usr/local/bin/cockroach sql --url=$CONNECT  --execute "create TABLE IF NOT EXISTS kv.kv ( k int8 primary key, v bytes not null, _source string  NOT VISIBLE default '{{region}}' on update '{{region}}', _timestamp timestamptz NOT VISIBLE DEFAULT now() + '1s' on update now() + '1s');"

@@ -81,9 +81,10 @@ variable "cidr" {
   type        = string
 }
 
-variable "run_k8s_cockroach" {
-   description = "run the cockroach deployment in ansible"
-   type        = string
+variable "run_ansible" {
+   description = "run the ansible"
+   type        = bool
+   default     = true
 }
 
 
@@ -176,4 +177,52 @@ variable "crdb_service_name" {
       description = "full instance key path for the application node"
       type        = string
       default     = ""
+    }
+
+# ---------------------------
+# inventory files
+# --------------------------
+    variable "instances_inventory_file" {
+        description = "File name to send inventory details for ansible later. this is relative to the calling main.tf file"
+        type        = string
+        default = "../inventory"
+    }
+
+    variable "playbook_working_directory" {
+        description = "Path for the working directory"
+        type        = string
+        default = "../../ansible"
+    }
+
+    variable "playbook_instances_inventory_file" {
+        description = "Path for the playbook command to use for the instances inventory file"
+        type        = string
+        default = "../terraform-aws/inventory"
+    }
+
+    variable "instances_inventory_directory" {
+        description = "Path for the inventory directory, this is relative to playbook_working_directory"
+        type        = string
+        default = "../temp/"
+    }
+
+    variable "inventory_template_file" {
+        description = "File name and Path to for inventory template file."
+        type        = string
+        default = "../terraform-aws/templates/inventory.tpl"
+    }
+    variable "ansible_verbosity_switch" {
+        description = "ansible level of messaging"
+        type        = string
+        default = "-v"
+    }
+    variable "mount_file_location" {
+      description = "The mount point for large files.  Subdirectory of adminuser will be added as well"
+      type        = string
+      default     = "/mnt/data"
+    }
+    variable "crdb_version" {
+      description = "CockroachDB Version"
+      type        = string
+      default     = "25.2.1"
     }

@@ -32,6 +32,8 @@ locals {
     0,
     local.slice_end
   )
+  crdb_private_endpoint_dns = cockroach_cluster.advanced.regions[0].internal_dns
+  crdb_public_endpoint_dns  = cockroach_cluster.advanced.regions[0].sql_dns
 }
 
 data "aws_availability_zones" "available" {

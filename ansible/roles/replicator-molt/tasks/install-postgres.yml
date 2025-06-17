@@ -1,0 +1,125 @@
+---
+# roles/replicator-molt/tasks/install-postgres.yml
+
+- name: Debug OS information
+  become: yes
+  debug:
+    msg: >
+      The operating system is {{ ansible_facts['distribution'] }}
+      and the version is {{ ansible_facts['distribution_version'] }}
+
+- name: Set variable if Amazon Linux
+  set_fact:
+    is_amazon_linux: "{{ ansible_facts['distribution'] == 'Amazon' }}"
+
+- name: Enable PostgreSQL YUM repo (non-Amazon)
+  become: yes
+  shell:
+    cmd: dnf install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+  when: not is_amazon_linux | bool
+
+- name: Install postgresql-server (non-Amazon)
+  become: yes
+  dnf:
+    name: postgresql15-server
+    state: present
+  when: not is_amazon_linux | bool
+
+- name: Install postgresql-server (Amazon)
+  become: yes
+  dnf:
+    name: postgresql15-server
+    state: present
+  when: is_amazon_linux | bool
+
+- name: Initialize PostgreSQL database (non-Amazon)
+  become: yes
+  shell:
+    cmd: /usr/pgsql-15/bin/postgresql-15-setup initdb
+    creates: /var/lib/pgsql/15/data/postgresql.conf
+  when: not is_amazon_linux | bool
+
+- name: Initialize PostgreSQL database (Amazon)
+  become: yes
+  shell:
+    cmd: /bin/postgresql-setup initdb
+    creates: /var/lib/pgsql/data/postgresql.conf
+  when: is_amazon_linux | bool
+
+- name: Copy pg_hba.conf (non-Amazon)
+  become: yes
+  copy:
+    src: pg_hba.conf
+    dest: /var/lib/pgsql/15/data/pg_hba.conf
+    owner: postgres
+    group: postgres
+    mode: '0600'
+  when: not is_amazon_linux | bool
+
+- name: Copy pg_hba.conf (Amazon)
+  become: yes
+  copy:
+    src: pg_hba.conf
+    dest: /var/lib/pgsql/data/pg_hba.conf
+    owner: postgres
+    group: postgres
+    mode: '0600'
+  when: is_amazon_linux | bool
+
+- name: Configure PostgreSQL replication settings
+  become: yes
+  blockinfile:
+    path: >-
+      {{ 
+        is_amazon_linux | bool 
+          and '/var/lib/pgsql/data/postgresql.conf'
+          or '/var/lib/pgsql/15/data/postgresql.conf'
+      }}
+    marker: "# {mark} ANSIBLE MANAGED POSTGRES REPLICATION CONFIG"
+    block: |
+      # Replication settings
+      wal_level = logical
+      max_wal_senders = 3
+      max_replication_slots = 3
+      wal_keep_size = 1024
+      hot_standby = on
+
+
+- name: Start PostgreSQL (non-Amazon)
+  become: yes
+  systemd:
+    name: postgresql-15
+    state: started
+    enabled: yes
+  when: not is_amazon_linux | bool
+
+- name: Start PostgreSQL (Amazon)
+  become: yes
+  systemd:
+    name: postgresql
+    state: started
+    enabled: yes
+  when: is_amazon_linux | bool
+
+- name: Install psycopg2-binary (Amazon Linux 2023)
+  become: yes
+  pip:
+    name: psycopg2-binary
+    executable: pip3
+  when: is_amazon_linux | bool
+
+- name: Install python3-psycopg2 (Debian/Ubuntu)
+  become: yes
+  apt:
+    name: python3-psycopg2
+    state: present
+  when: not is_amazon_linux | bool
+
+- name: Set PostgreSQL superuser password (idempotent)
+  become: yes
+  become_user: postgres
+  community.postgresql.postgresql_user:
+    name: postgres
+    password: "{{ db_admin_password }}"
+    login_unix_socket: /var/run/postgresql
+

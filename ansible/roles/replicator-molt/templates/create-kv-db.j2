@@ -1,0 +1,2 @@
+export CONNECT='postgresql://{{ db_admin_user }}:{{ db_admin_password }}@{{load_balancer_private_ip}}:26257/?sslmode=verify-full&sslrootcert=/home/{{ login_username }}/certs/ca.crt'
+/usr/local/bin/cockroach sql --url=${CONNECT} --execute 'create database if not exists kv;'

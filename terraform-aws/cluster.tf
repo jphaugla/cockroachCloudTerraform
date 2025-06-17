@@ -51,3 +51,14 @@ resource "cockroach_sql_user" "app_user" {
   name       = var.sql_user_name
   password   = var.sql_user_password
 }
+ 
+# data source to grab the cluster cert for your cluster
+data "cockroach_cluster_cert" "cluster" {
+  # use the resource you already created
+  id = cockroach_cluster.advanced.id
+}
+
+resource "local_file" "cluster_cert" {
+  filename = "${var.playbook_working_directory}/temp/${var.aws_region}/tls_cert"
+  content  = data.cockroach_cluster_cert.cluster.cert
+}

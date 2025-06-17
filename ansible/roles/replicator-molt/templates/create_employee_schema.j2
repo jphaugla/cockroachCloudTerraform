@@ -1,0 +1,3 @@
+export AWS_REGION="{{ region }}"
+export COCKROACH_CONNECT='postgresql://{{ db_admin_user }}:{{ db_admin_password }}@{{load_balancer_private_ip}}:26257/?sslmode=verify-full&sslrootcert=/home/{{ login_username }}/certs/ca.crt'
+cockroach sql --url=${COCKROACH_CONNECT}  --file=employees_converted.sql

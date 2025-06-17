@@ -1,0 +1,23 @@
+- name: make certs dir
+  become: yes
+  file:
+    path: "/home/{{ login_username }}/certs"
+    state: directory
+    mode: '0755'
+    owner: "{{ login_username }}"
+    group: "{{ login_username }}"
+
+- name: make my-safe-directory dir
+  become: yes
+  file:
+    path: "/home/{{ login_username }}/my-safe-directory"
+    state: directory
+    mode: '0755'
+    owner: "{{ login_username }}"
+    group: "{{ login_username }}"
+
+- name: create ca.crt
+  copy:
+    src: "./temp/{{region}}/tls_cert"
+    dest: "/home/{{ login_username }}/certs/ca.crt"
+    mode: '0400'

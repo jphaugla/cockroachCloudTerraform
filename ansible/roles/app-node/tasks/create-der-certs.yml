@@ -1,0 +1,6 @@
+# create der certs
+- name: create ca.crt.der
+  shell: 
+    cmd: "openssl x509 -outform der -in ca.crt -out ca.crt.der"
+    chdir: /home/{{login_username}}/certs
+
