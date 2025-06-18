@@ -57,7 +57,7 @@ edit main.tf to set enable_private_dns = false
 In the cockroach cloud UI go to the Networking->Private endpoint page
 Click on the actions dots and select "Finish setup"
 
-6. **set enable_private_dns to false**
+6. **set enable_private_dns to true**
 edit main.tf to set enable_private_dns = true
 
 7. **repeat step 3 and 4**
@@ -79,16 +79,6 @@ On your EC2 app host, set:
 ```bash
 export DATABASE_URL="postgresql://<user>:<pass>@$(terraform output -raw crdb_sql_dns):26257/defaultdb?sslmode=verify-full&sslrootcert=/home/ec2-user/certs/ca.crt"
 cockroach sql --url="$DATABASE_URL"
-```
-
-### Running Load Generator
-
-A Node.js script `scripts/run-load.js` generates sample load via the Next.js API:
-
-```bash
-npm install
-npm run dev                    # in one terminal, start Next.js on 0.0.0.0:3000
-npm run load       # in another terminal: sessions=100, orders=50, restock=30s
 ```
 
 ## Cleanup
