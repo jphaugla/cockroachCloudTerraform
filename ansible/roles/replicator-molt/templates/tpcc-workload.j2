@@ -1,3 +1,2 @@
-export CONNECT='postgresql://{{ db_admin_user }}:{{ db_admin_password }}@{{load_balancer_private_ip}}:26257?sslmode=verify-full&sslrootcert=/home/{{ login_username }}/certs/ca.crt'
 # cockroach workload init kv ${CONNECT}
-cockroach workload run tpcc --fks --drop ${CONNECT}
+cockroach workload run tpcc --fks --drop 'postgresql://{{ db_admin_user }}:{{ db_admin_password }}@{{load_balancer_private_ip}}:26257?sslmode=verify-full&sslrootcert=/home/{{ login_username }}/certs/ca.crt'

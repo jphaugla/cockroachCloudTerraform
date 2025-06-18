@@ -1,16 +1,10 @@
 # locals.tf
 locals {
-  effective_regions = length(var.regions) > 0 ? var.regions : [
-    {
-      name       = var.aws_region
-      node_count = var.node_count
-    }
-  ]
+  tags = merge(var.resource_tags, local.required_tags)
   required_tags = {
     owner       = var.owner,
     project     = var.project_name,
   }
-  tags = merge(var.resource_tags, local.required_tags)
   admin_username = "ec2-user"
   # create 6 subnets: 3 for public subnets, 3 for private subnets
   subnet_list = cidrsubnets(var.cidr,3,3,3,3,3,3)
@@ -32,8 +26,6 @@ locals {
     0,
     local.slice_end
   )
-  crdb_private_endpoint_dns = cockroach_cluster.advanced.regions[0].internal_dns
-  crdb_public_endpoint_dns  = cockroach_cluster.advanced.regions[0].sql_dns
 }
 
 data "aws_availability_zones" "available" {

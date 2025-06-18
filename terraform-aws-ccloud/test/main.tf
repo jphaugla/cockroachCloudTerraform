@@ -1,16 +1,30 @@
 # terraform.tfvars.example
 module "my_aws" {
 
+enable_private_dns = true
+
 # the owner and cluster_postfix will be joined to make the cluster name
 owner                = "jphaugla"
 project_name         = "crdb"
-aws_region           = "us-east-2"
-cidr 		     =  "10.0.0.0/16"
+aws_region_list      = ["us-east-1", "us-west-2", "us-east-2"]
+ssh_private_key_list = [
+    "~/.ssh/jph-cockroach-us-east-1-kp01.pem",
+    "~/.ssh/jph-cockroach-us-west-2-kp01.pem",
+    "~/.ssh/jph-cockroach-us-east-2-kp01.pem"
+]
+aws_instance_keys = [
+    "jph-cockroach-us-east-1-kp01",
+    "jph-cockroach-us-west-2-kp01",
+    "jph-cockroach-us-east-2-kp01"
+]
+vpc_cidr_list = [
+    "192.168.3.0/24",
+    "192.168.4.0/24",
+    "192.168.5.0/24"
+]
 aws_config           = ["/Users/jasonhaugland/.aws2/config"]
 app_instance_type    = "t3.xlarge"
 aws_credentials      = ["/Users/jasonhaugland/.aws2/credentials"]
-instance_key_name     = "jph-cockroach-us-east-2-kp01"
-ssh_private_key      = "~/.ssh/jph-cockroach-us-east-2-kp01.pem"
 crdb_service_name    = "jphaugla-api"
 run_ansible          = true
 node_count           = 3

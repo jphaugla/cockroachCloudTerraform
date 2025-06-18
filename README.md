@@ -1,18 +1,22 @@
 # Cockroach Cloud Terraform
 
-This repository contains Terraform configurations to provision and manage a CockroachDB Advanced cluster on Cockroach Cloud, along with the necessary AWS infrastructure for PrivateLink connectivity and an application node.
+This repository contains Terraform/Ansible configurations to provision and manage a CockroachDB Advanced cluster on Cockroach Cloud, along with the necessary AWS infrastructure for PrivateLink connectivity and an application node.
 
 ## Repository Structure
+
+### Directory Structure
+
+- **ansible**:  Contains the ansible tasks for deploying the application node
+- **terraform-aws-app**:  terraform for aws application node
+The terraform files in **terraform-aws-app** create the networking for an application node, an application node, and private link definitions 
+- **terraform-aws-ccloud**:  terraform for cockroach cloud
+The terraform files in **terraform-aws-ccloud** define the cockroach cloud cluster and also initiate an application server for each of the defined regions.   
 
 - **providers.tf**: Configures Terraform providers for AWS and CockroachDB.
 - **variables.tf**: Declares all input variables for customizing the deployment.
 - **locals.tf**: Defines computed values and fallbacks (e.g., `effective_regions`).
-- **data.tf**: Data sources for AWS availability zones, AWS caller identity, and CockroachDB folder lookup.
-- **vpc.tf**: AWS VPC and Internet Gateway resources.
-- **subnets.tf**: Public and private subnet definitions.
-- **routing.tf**: Route tables and associations.
-- **security_groups.tf**: Security Group modules, including `sg_application`.
-- **network_interfaces.tf**: Application network interface configuration.
+- **sg_application.tf, sg_intra.tf, sg_management.tf**: Security Group modules.
+- **network.tf**: Application network components.
 - **privatelink.tf**: Resources to expose, connect, and trust the CockroachDB PrivateLink service:
   - `cockroach_private_endpoint_services`
   - `aws_vpc_endpoint`
@@ -29,45 +33,34 @@ This repository contains Terraform configurations to provision and manage a Cock
    ```bash
    export COCKROACH_API_KEY="<your_api_key>"
    ```
-4. **Environment Variables** (optional, if using a custom .env loader):
-   ```bash
-   export AWS_REGION="us-east-2"
-   export COCKROACH_API_URL="https://api.cockroachlabs.cloud"
-   ```
 
 ## Quick Start
+NOTES: the control file for this is  terrafrom-aws-ccloud/test/main.tf 
+       because of the private links in the terraform, an extra apply is needed
 
-1. **Initialize Terraform**
+1. **get to correct directory**
+   ```bash
+   cd terrafrom-aws-ccloud/test
+   ```
+2. **set enable_private_dns to false**
+edit main.tf to set enable_private_dns = false
+
+3. **Initialize Terraform**
    ```bash
    terraform init
    ```
-2. **Plan**
+4. **Apply**
    ```bash
-   terraform plan -out tfplan
+   terraform apply -auto-approve 
    ```
-3. **Apply**
-   ```bash
-   terraform apply -auto-approve tfplan
-   ```
+5. **accept the connection in cockroach cloud network**
+In the cockroach cloud UI go to the Networking->Private endpoint page
+Click on the actions dots and select "Finish setup"
 
-## Post-Deployment
+6. **set enable_private_dns to false**
+edit main.tf to set enable_private_dns = true
 
-### Retrieve Cluster Certificates
-
-Use the `cockroach_cluster_cert` data source and `local_file` to download the CA certificate:
-
-```hcl
-data "cockroach_cluster_cert" "cluster" {
-  id = cockroach_cluster.advanced.id
-}
-
-resource "local_file" "cluster_ca" {
-  filename = "./certs/${cockroach_cluster.advanced.name}-ca.crt"
-  content  = data.cockroach_cluster_cert.cluster.cert
-}
-```
-
-After `terraform apply`, your CA cert will be in `./certs/`.
+7. **repeat step 3 and 4**
 
 ### Obtain PrivateLink DNS
 
@@ -95,25 +88,8 @@ A Node.js script `scripts/run-load.js` generates sample load via the Next.js API
 ```bash
 npm install
 npm run dev                    # in one terminal, start Next.js on 0.0.0.0:3000
-npm run load -- 100 50 30      # in another terminal: sessions=100, orders=50, restock=30s
+npm run load       # in another terminal: sessions=100, orders=50, restock=30s
 ```
-
-## Variables
-
-Core variables are declared in `variables.tf`. You can override via:
-- `terraform.tfvars`
-- `-var 'key=value'` flags
-- Environment variables `TF_VAR_<key>`
-
-Notable variables:
-
-| Variable             | Description                                      | Default         |
-|----------------------|--------------------------------------------------|-----------------|
-| `regions`            | List of `{ name, node_count }` for the cluster   | Fallback to `aws_region` & `node_count` |
-| `aws_region`         | AWS region for all resources                     | `us-east-2`     |
-| `node_count`         | Nodes per region if `regions` is empty           | `3`             |
-| `include_app`        | Whether to provision the EC2 application node    | `"yes"`/"no" |
-| `resource_tags`      | Map of tags applied to all AWS resources         | `{}`            |
 
 ## Cleanup
 
@@ -123,9 +99,4 @@ To destroy everything:
 terraform destroy -auto-approve
 ```
 
-> **Note:** The `cockroach_private_endpoint_services` resource has `prevent_destroy = true` by default to avoid orphaning PrivateLink services. You must manually remove that resource block or disable `prevent_destroy` if you truly want to tear down the PrivateLink service.
-
 ---
-
-_This README was autogenerated by the project maintainer._
-

@@ -1,6 +1,4 @@
-export AWS_REGION="{{ region }}"
-export COCKROACH_CONNECT='postgresql://{{ db_admin_user }}@{{load_balancer_private_ip}}:26257/?sslmode=verify-full&sslrootcert=/home/{{ login_username }}/certs/ca.crt'
 molt convert postgres \
---url ${COCKROACH_CONNECT} \
+--url 'postgresql://{{ db_admin_user }}@{{load_balancer_private_ip}}:26257/?sslmode=verify-full&sslrootcert=/home/{{ login_username }}/certs/ca.crt' \
 --schema employees.sql \
 --out employees_converted.sql

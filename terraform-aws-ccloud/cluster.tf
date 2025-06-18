@@ -57,8 +57,3 @@ data "cockroach_cluster_cert" "cluster" {
   # use the resource you already created
   id = cockroach_cluster.advanced.id
 }
-
-resource "local_file" "cluster_cert" {
-  filename = "${var.playbook_working_directory}/temp/${var.aws_region}/tls_cert"
-  content  = data.cockroach_cluster_cert.cluster.cert
-}

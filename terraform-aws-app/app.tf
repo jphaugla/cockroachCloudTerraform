@@ -47,3 +47,8 @@ data "aws_ami" "amazon_linux_2023_x64" {
       values = [ "hvm" ]
   }
 }
+
+resource "local_file" "cluster_cert" {
+  filename = "${var.playbook_working_directory}/temp/${var.aws_region}/tls_cert"
+  content  = var.crdb_cluster_cert
+}
