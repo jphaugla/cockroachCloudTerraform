@@ -9,8 +9,8 @@ This repository contains Terraform/Ansible configurations to provision and manag
 - **ansible**:  Contains the ansible tasks for deploying the application node
 - **terraform-aws-app**:  terraform for aws application node
 The terraform files in **terraform-aws-app** create the networking for an application node, an application node, and private link definitions 
-- **terraform-aws-ccloud**:  terraform for cockroach cloud
-The terraform files in **terraform-aws-ccloud** define the cockroach cloud cluster and also initiate an application server for each of the defined regions.   
+- **terraform-ccloud**:  terraform for cockroach cloud
+The terraform files in **terraform-ccloud** define the cockroach cloud cluster and also initiate an application server for each of the defined regions.   
 
 - **providers.tf**: Configures Terraform providers for AWS and CockroachDB.
 - **variables.tf**: Declares all input variables for customizing the deployment.
@@ -35,12 +35,12 @@ The terraform files in **terraform-aws-ccloud** define the cockroach cloud clust
    ```
 
 ## Quick Start
-NOTES: the control file for this is  terrafrom-aws-ccloud/test/main.tf 
+NOTES: the control file for this is  terrafrom-ccloud/test/main.tf 
        because of the private links in the terraform, an extra apply is needed
 
 1. **get to correct directory**
    ```bash
-   cd terrafrom-aws-ccloud/test
+   cd terrafrom-ccloud/test
    ```
 2. **set enable_private_dns to false**
 edit main.tf to set enable_private_dns = false
