@@ -22,12 +22,10 @@ variable "plan" {
   description = "Cluster plan: BASIC, STANDARD, or ADVANCED"
   type        = string
   default     = "ADVANCED"
-}
-
-variable "regions" {
-  description = "Optional list of regions + node counts. If empty, we'll use aws_region/node_count."
-  type        = list(object({ name = string, node_count = number }))
-  default     = []
+  validation {
+    condition     = contains(["BASIC", "STANDARD", "ADVANCED"], var.plan)
+    error_message = "Invalid plan: must be one of \"BASIC\", \"STANDARD\", or \"ADVANCED\"."
+  }
 }
 
 variable "storage_gib" {
@@ -75,28 +73,46 @@ variable "sql_user_password" {
   description = "SQL user password"
   type        = string
 }
+# ─────────────────────────────────────────────────────────────────────────────
+# 1. MULTI-REGION DRIVER PARAMETERS
+# ─────────────────────────────────────────────────────────────────────────────
 
-variable "cidr" {
-  description = "cidr for the EKS cluster"
-  type        = string
+variable "aws_region_list" {
+  description = "List of three AWS regions to deploy CockroachDB (e.g. [\"us-east-1\",\"us-west-2\",\"us-east-2\"])."
+  type        = list(string)
+  default     = ["us-east-1", "us-west-2", "us-east-2"]
+}
+
+variable "aws_instance_keys" {
+  description = "List of three EC2 Key Pair names—one per region, in the same order as aws_region_list."
+  type        = list(string)
+  default     = [
+    "nollen-cockroach-us-east-1-kp01",
+    "nollen-cockroach-us-west-2-kp01",
+    "nollen-cockroach-us-east-2-kp01"
+  ]
+}
+
+variable "ssh_private_key_list" {
+  description = "List of three local paths to the private key files—one per region, matching aws_instance_keys."
+  type        = list(string)
+  default     = [
+    "~/.ssh/nollen-cockroach-us-east-1-kp01.pem",
+    "~/.ssh/nollen-cockroach-us-west-2-kp01.pem",
+    "~/.ssh/nollen-cockroach-us-east-2-kp01.pem"
+  ]
+}
+
+variable "vpc_cidr_list" {
+  description = "List of three VPC CIDR blocks—one per region."
+  type        = list(string)
+  default     = ["192.168.3.0/24", "192.168.4.0/24", "192.168.5.0/24"]
 }
 
 variable "run_ansible" {
    description = "run the ansible"
    type        = bool
    default     = true
-}
-
-
-variable "kubeconfig" {
-   description = "location for the kubeconfig file"
-   default = "/Users/jasonhaugland/.kube/config"
-   type        = string
-}
-
-variable "aws_region" {
-   description = "aws region to use"
-   type        = string
 }
 
 variable "aws_config" {
@@ -152,13 +168,11 @@ variable "crdb_service_name" {
     variable "owner" {
       description = "Owner of the infrastructure"
       type        = string
-      default     = ""
     }
 
     variable "project_name" {
       description = "project name to append to the owner"
       type        = string
-      default     = ""
     }
 
     # Optional tags
@@ -168,84 +182,23 @@ variable "crdb_service_name" {
       default     = {}
     }
 
-    variable "instance_key_name" {
-      description = "instance key name for the application node-this is name and not full path"
-      type        = string
-      default     = ""
-    }
-    variable "ssh_private_key" {
-      description = "full instance key path for the application node"
-      type        = string
-      default     = ""
-    }
-
-# ---------------------------
-# inventory files
-# --------------------------
-    variable "instances_inventory_file" {
-        description = "File name to send inventory details for ansible later. this is relative to the calling main.tf file"
-        type        = string
-        default = "../inventory"
-    }
-
-    variable "playbook_working_directory" {
-        description = "Path for the working directory"
-        type        = string
-        default = "../../ansible"
-    }
-
-    variable "playbook_instances_inventory_file" {
-        description = "Path for the playbook command to use for the instances inventory file"
-        type        = string
-        default = "../terraform-aws-app/inventory"
-    }
-
-    variable "instances_inventory_directory" {
-        description = "Path for the inventory directory, this is relative to playbook_working_directory"
-        type        = string
-        default = "../temp/"
-    }
-
-    variable "inventory_template_file" {
-        description = "File name and Path to for inventory template file."
-        type        = string
-        default = "../terraform-aws-app/templates/inventory.tpl"
-    }
     variable "ansible_verbosity_switch" {
         description = "ansible level of messaging"
         type        = string
         default = "-v"
     }
+
     variable "mount_file_location" {
       description = "The mount point for large files.  Subdirectory of adminuser will be added as well"
       type        = string
       default     = "/mnt/data"
     }
+
     variable "crdb_version" {
       description = "CockroachDB Version"
       type        = string
       default     = "25.2.1"
     }
-    variable "crdb_private_endpoint_dns" {
-      description = "private endpoint for cockroach cloud"
-      type        = string
-    }
-
-    variable "crdb_public_endpoint_dns" {
-      description = "public endpoint for cockroach cloud"
-      type        = string
-    }
-
-    variable "crdb_cluster_id" {
-      description = "The ID of the CockroachDB cluster to connect/apply allow-lists against"
-      type        = string
-    }
-
-    variable "crdb_cluster_cert" {
-      description = "PEM-encoded CA certificate for the CockroachDB cluster"
-      type        = string
-    }
- 
     variable "enable_private_dns" {
       description = "Whether to turn on AWS PrivateLink Private DNS"
       type        = bool

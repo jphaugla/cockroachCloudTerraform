@@ -1,0 +1,68 @@
+# ──────────────────────────────────────────────────────────────────────────────
+# app-nodes.tf
+#
+# Deploy your application nodes into up to three Azure regions,
+# driven by the length of var.region_list.
+# ──────────────────────────────────────────────────────────────────────────────
+
+# 1) AzureRM provider aliases
+provider "azurerm" {
+  alias    = "region0"
+  features {}
+  # optionally: subscription_id, client_id, etc.
+}
+
+provider "azurerm" {
+  alias    = "region1"
+  features {}
+}
+
+provider "azurerm" {
+  alias    = "region2"
+  features {}
+}
+
+# 2) Module for Region 0 (Primary), only if you passed at least 1 region
+module "app-region-0" {
+  count   = local.region_count > 0 ? 1 : 0
+  source  = "../terraform-azure-app"
+  providers = {
+    azurerm = azurerm.region0
+  }
+
+  # Common inputs
+  owner               = var.owner
+  resource_name        = var.project_name
+
+  # Region-specific bits
+  virtual_network_location = var.region_list[0]
+  virtual_network_cidr     = var.vpc_cidr_list[0]
+
+  # SSH / Key
+  ssh_private_key     = var.ssh_private_key_list[0]
+  ssh_key_name        = var.instance_keys[0]
+  ssh_key_resource_group = "jhaugland-rg"
+  my_ip_address       = var.my_ip_address
+
+  # App machine sizing
+  include_app         = var.include_app
+  app_vm_size         = var.app_instance_type  # or app_instance_type
+  app_disk_size       = var.app_disk_size
+
+  # Cockroach cluster endpoints
+  crdb_private_endpoint_dns = local.crdb_private_endpoint_dns_list[0]
+  crdb_public_endpoint_dns  = local.crdb_public_endpoint_dns_list[0]
+  crdb_cluster_cert         = data.cockroach_cluster_cert.cluster.cert
+  crdb_version              = var.crdb_version
+  crdb_cluster_id           = cockroach_cluster.advanced.id
+  sql_user_name             = var.sql_user_name
+  sql_user_password         = var.sql_user_password
+
+  # Ansible / Inventory
+  run_ansible                 = var.run_ansible
+  playbook_working_directory         = "../../ansible"
+  instances_inventory_file           = "../../terraform-azure-app/inventory-${var.region_list[0]}"
+  playbook_instances_inventory_file  = "../terraform-azure-app/inventory-${var.region_list[0]}"
+  instances_inventory_directory      = "temp"
+  inventory_template_file            = "templates/inventory.tpl"
+}

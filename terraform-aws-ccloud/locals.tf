@@ -7,7 +7,6 @@ locals {
       node_count = var.node_count
     }
   ]
-
   required_tags = {
     owner   = var.owner
     project = var.project_name
@@ -22,5 +21,6 @@ locals {
   crdb_public_endpoint_dns_list = [
     for r in cockroach_cluster.advanced.regions : r.sql_dns
   ]
+  region_count = length(local.crdb_private_endpoint_dns_list)
 }
 

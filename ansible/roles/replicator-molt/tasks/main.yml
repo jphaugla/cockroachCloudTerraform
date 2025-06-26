@@ -16,11 +16,6 @@
   when:
     - setup_crdb_employee|bool
 
-- name: start replicator
-  include_tasks: start-replicator.yml
-  when:
-    - start_replicator|bool
-
 - name: create kv workload
   include_tasks: create-kv.yml
   when:

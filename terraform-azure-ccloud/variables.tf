@@ -15,13 +15,17 @@ variable "env_file" {
 variable "cloud_provider" {
   description = "Cloud provider for the cluster"
   type        = string
-  default     = "AWS"
+  default     = "AZURE"
 }
 
 variable "plan" {
   description = "Cluster plan: BASIC, STANDARD, or ADVANCED"
   type        = string
   default     = "ADVANCED"
+  validation {
+    condition     = contains(["BASIC", "STANDARD", "ADVANCED"], var.plan)
+    error_message = "Invalid plan: must be one of \"BASIC\", \"STANDARD\", or \"ADVANCED\"."
+  }
 }
 
 variable "storage_gib" {
@@ -73,14 +77,14 @@ variable "sql_user_password" {
 # 1. MULTI-REGION DRIVER PARAMETERS
 # ─────────────────────────────────────────────────────────────────────────────
 
-variable "aws_region_list" {
+variable "region_list" {
   description = "List of three AWS regions to deploy CockroachDB (e.g. [\"us-east-1\",\"us-west-2\",\"us-east-2\"])."
   type        = list(string)
   default     = ["us-east-1", "us-west-2", "us-east-2"]
 }
 
-variable "aws_instance_keys" {
-  description = "List of three EC2 Key Pair names—one per region, in the same order as aws_region_list."
+variable "instance_keys" {
+  description = "List of three EC2 Key Pair names—one per region, in the same order as region_list."
   type        = list(string)
   default     = [
     "nollen-cockroach-us-east-1-kp01",
@@ -90,7 +94,7 @@ variable "aws_instance_keys" {
 }
 
 variable "ssh_private_key_list" {
-  description = "List of three local paths to the private key files—one per region, matching aws_instance_keys."
+  description = "List of three local paths to the private key files—one per region, matching instance_keys."
   type        = list(string)
   default     = [
     "~/.ssh/nollen-cockroach-us-east-1-kp01.pem",
@@ -110,17 +114,6 @@ variable "run_ansible" {
    type        = bool
    default     = true
 }
-
-variable "aws_config" {
-   description = "aws config file"
-   type        = list(string)
-}
-
-variable "aws_credentials" {
-   description = "aws credentials directory"
-   type        = list(string)
-}
-
 
 variable "node_count" {
    description = "the number of nodes"
@@ -201,3 +194,12 @@ variable "crdb_service_name" {
       default     = false
     }
 
+    variable "app_disk_size" {
+      description = "Size of the disk attached to the vm"
+      type        = number
+      default     = 64
+      validation {
+        condition = contains([64, 128, 256, 512], var.app_disk_size)
+        error_message = "CRDB Node disk size (in GB) must be 64, 128, 256 or 512"
+      }
+    }
