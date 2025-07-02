@@ -1,12 +1,29 @@
-- hosts: all_public_node_ips
-  gather_facts: True
-  roles:
-    - common
 - hosts: app_node_ips
-  gather_facts: True
+  gather_facts: no
+
+  pre_tasks:
+    - name: Wait for SSH connectivity
+      wait_for_connection:
+        delay: 5
+        timeout: 300
+        sleep: 5
+#- hosts: localhost
+#  gather_facts: no
+#  roles:
+#    - privatelink
+#- hosts: app_node_ips
+#  gather_facts: no
+#  roles:
+#    - localstack
+#- hosts: all_public_node_ips
+#  gather_facts: no
+#  roles:
+#    - common
+- hosts: app_node_ips
+  gather_facts: yes
   roles:
     - app-node
-- hosts: app_node_ips
-  gather_facts: True
-  roles:
-    - replicator-molt
+#- hosts: app_node_ips
+#  gather_facts: yes
+#  roles:
+#    - replicator-molt

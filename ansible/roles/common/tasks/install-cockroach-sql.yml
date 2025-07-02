@@ -1,3 +1,10 @@
+- name: ensure /usr/local/bin is in the user’s PATH
+  lineinfile:
+    path: "/home/{{ login_username }}/.bash_profile"
+    line: 'export PATH=/usr/local/bin:$PATH'
+    create: yes
+    state: present
+
 - name: Get system architecture
   shell: "uname -m"
   register: system_arch

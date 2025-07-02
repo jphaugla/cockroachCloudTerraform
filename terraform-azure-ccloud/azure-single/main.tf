@@ -32,4 +32,7 @@ my_ip_address        = "174.141.204.193"
 # ----------------------------------------
 netskope_ips = ["8.36.116.0/24" ,"8.39.144.0/24", "31.186.239.0/24", "163.116.128.0/17", "162.10.0.0/17"]
 crdb_version = "25.2.1"
+ansible_verbosity_switch = "-vv"
+cockroach_api_token = var.cockroach_api_token
+cockroach_api_key   = var.cockroach_api_key
 }

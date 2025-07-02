@@ -1,7 +1,0 @@
-[app_node_ips]
-172.172.81.189
-[all_public_node_ips]
-172.172.81.189
-[all:vars]
-ansible_connection=ssh
-ansible_user=adminuser

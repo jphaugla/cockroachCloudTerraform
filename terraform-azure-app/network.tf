@@ -19,6 +19,10 @@ resource "azurerm_subnet" "private" {
   resource_group_name  = local.resource_group_name
   virtual_network_name = azurerm_virtual_network.vm01.name
   address_prefixes     = [ local.private_subnet_list[count.index] ]
+  lifecycle {
+    # ignore ANY drift on this subnet so TF never tries to touch the policy
+    ignore_changes = all
+  }
 }
 
 # 3) Public subnets
@@ -28,28 +32,6 @@ resource "azurerm_subnet" "public" {
   resource_group_name  = local.resource_group_name
   virtual_network_name = azurerm_virtual_network.vm01.name
   address_prefixes     = [ local.public_subnet_list[count.index] ]
-}
-
-# 4) Security group
-resource "azurerm_network_security_group" "desktop_sg" {
-  name                = "${var.owner}-${var.resource_name}-sg"
-  location            = var.virtual_network_location
-  resource_group_name = local.resource_group_name
-  tags                = local.tags
-}
-
-# 5) Associate your SG to all private subnets (for example)
-resource "azurerm_subnet_network_security_group_association" "private_sg" {
-  count                     = length(azurerm_subnet.private)
-  subnet_id                 = azurerm_subnet.private[count.index].id
-  network_security_group_id = azurerm_network_security_group.desktop_sg.id
-}
-
-# 6) Associate your SG to all public subnets (if desired)
-resource "azurerm_subnet_network_security_group_association" "public_sg" {
-  count                     = length(azurerm_subnet.public)
-  subnet_id                 = azurerm_subnet.public[count.index].id
-  network_security_group_id = azurerm_network_security_group.desktop_sg.id
 }
 
 # 7) Now, anywhere you need a private‐subnet_id, you can use:

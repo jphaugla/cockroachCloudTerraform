@@ -82,39 +82,6 @@ variable "region_list" {
   type        = list(string)
   default     = ["us-east-1", "us-west-2", "us-east-2"]
 }
-
-variable "instance_keys" {
-  description = "List of three EC2 Key Pair names—one per region, in the same order as region_list."
-  type        = list(string)
-  default     = [
-    "nollen-cockroach-us-east-1-kp01",
-    "nollen-cockroach-us-west-2-kp01",
-    "nollen-cockroach-us-east-2-kp01"
-  ]
-}
-
-variable "ssh_private_key_list" {
-  description = "List of three local paths to the private key files—one per region, matching instance_keys."
-  type        = list(string)
-  default     = [
-    "~/.ssh/nollen-cockroach-us-east-1-kp01.pem",
-    "~/.ssh/nollen-cockroach-us-west-2-kp01.pem",
-    "~/.ssh/nollen-cockroach-us-east-2-kp01.pem"
-  ]
-}
-
-variable "vpc_cidr_list" {
-  description = "List of three VPC CIDR blocks—one per region."
-  type        = list(string)
-  default     = ["192.168.3.0/24", "192.168.4.0/24", "192.168.5.0/24"]
-}
-
-variable "run_ansible" {
-   description = "run the ansible"
-   type        = bool
-   default     = true
-}
-
 variable "node_count" {
    description = "the number of nodes"
    type        = number
@@ -124,36 +91,6 @@ variable "crdb_service_name" {
    description = "the cockroachdb cloud service name"
    type        = string
 }
-# ----------------------------------------
-# ----------------------------------------
-# APP Instance Specifications
-# ----------------------------------------
-    variable "include_app" {
-      description = "'yes' or 'no' to include an HAProxy Instance"
-      type        = string
-      default     = "yes"
-      validation {
-        condition = contains(["yes", "no"], var.include_app)
-        error_message = "Valid value for variable 'include_app' is : 'yes' or 'no'"
-      }
-    }
-
-    variable "app_instance_type" {
-      description = "App Instance Type"
-      type        = string
-      default     = "t3a.micro"
-    }
-
-    variable "setup_migration" {
-      description = "'yes' or 'no' to setup migration"
-      type        = string
-      default     = "yes"
-      validation {
-        condition = contains(["yes", "no"], var.setup_migration)
-        error_message = "Valid value for variable 'setup_migration' is : 'yes' or 'no'"
-      }
-    }
-
     variable "owner" {
       description = "Owner of the infrastructure"
       type        = string
@@ -171,35 +108,17 @@ variable "crdb_service_name" {
       default     = {}
     }
 
-    variable "ansible_verbosity_switch" {
-        description = "ansible level of messaging"
-        type        = string
-        default = "-v"
-    }
+variable "cockroach_api_token" {
+  description = "Cockroach Cloud API token (picks up from TF_VAR_cockroach_api_token)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
 
-    variable "mount_file_location" {
-      description = "The mount point for large files.  Subdirectory of adminuser will be added as well"
-      type        = string
-      default     = "/mnt/data"
-    }
+variable "cockroach_api_key" {
+  description = "Cockroach Cloud API key (alternative to token)"
+  type        = string
+  sensitive   = true
+  default     = ""
+}
 
-    variable "crdb_version" {
-      description = "CockroachDB Version"
-      type        = string
-      default     = "25.2.1"
-    }
-    variable "enable_private_dns" {
-      description = "Whether to turn on AWS PrivateLink Private DNS"
-      type        = bool
-      default     = false
-    }
-
-    variable "app_disk_size" {
-      description = "Size of the disk attached to the vm"
-      type        = number
-      default     = 64
-      validation {
-        condition = contains([64, 128, 256, 512], var.app_disk_size)
-        error_message = "CRDB Node disk size (in GB) must be 64, 128, 256 or 512"
-      }
-    }

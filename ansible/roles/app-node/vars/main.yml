@@ -4,7 +4,7 @@ maven_version: '3.9.10'
 #  this works fine but the maven version keeps changing so setting to true
 install_java_maven_go: true
 #  default set to false as it starts postgresql
-install_molt_replicator: false
+install_molt_replicator: true
 #  this isn't working
 install_dbworkload: false
 add_githubs: true

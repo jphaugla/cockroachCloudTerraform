@@ -11,13 +11,25 @@
 - name: Set variable if Amazon Linux
   set_fact:
     is_amazon_linux: "{{ ansible_facts['distribution'] == 'Amazon' }}"
-
-- name: Enable PostgreSQL YUM repo (non-Amazon)
+# ------------------------------------------------
+# PostgreSQL 15 YUM repo (non-Amazon)
+# ------------------------------------------------
+- name: Add PostgreSQL 15 YUM repository (non-Amazon)
   become: yes
-  shell:
-    cmd: dnf install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm
+  ansible.builtin.yum_repository:
+    name: pgdg15
+    description: "PostgreSQL 15 Community YUM repo"
+    baseurl: https://download.postgresql.org/pub/repos/yum/15/redhat/rhel-9-x86_64
+    gpgcheck: no
+    repo_gpgcheck: no
+    # point at the official key URL so DNF can fetch it
+    gpgkey: https://www.postgresql.org/download/keys/RPM-GPG-KEY-PGDG-RHEL
+    enabled: yes
   when: not is_amazon_linux | bool
 
+# ------------------------------------------------
+# Install PostgreSQL server
+# ------------------------------------------------
 - name: Install postgresql-server (non-Amazon)
   become: yes
   dnf:
@@ -32,6 +44,9 @@
     state: present
   when: is_amazon_linux | bool
 
+# ------------------------------------------------
+# Initialize database
+# ------------------------------------------------
 - name: Initialize PostgreSQL database (non-Amazon)
   become: yes
   shell:
@@ -46,6 +61,9 @@
     creates: /var/lib/pgsql/data/postgresql.conf
   when: is_amazon_linux | bool
 
+# ------------------------------------------------
+# pg_hba.conf
+# ------------------------------------------------
 - name: Copy pg_hba.conf (non-Amazon)
   become: yes
   copy:
@@ -66,6 +84,9 @@
     mode: '0600'
   when: is_amazon_linux | bool
 
+# ------------------------------------------------
+# Replication settings
+# ------------------------------------------------
 - name: Configure PostgreSQL replication settings
   become: yes
   blockinfile:
@@ -84,7 +105,9 @@
       wal_keep_size = 1024
       hot_standby = on
 
-
+# ------------------------------------------------
+# Service start & enable
+# ------------------------------------------------
 - name: Start PostgreSQL (non-Amazon)
   become: yes
   systemd:
@@ -101,6 +124,9 @@
     enabled: yes
   when: is_amazon_linux | bool
 
+# ------------------------------------------------
+# Client libs for Python
+# ------------------------------------------------
 - name: Install psycopg2-binary (Amazon Linux 2023)
   become: yes
   pip:
@@ -108,13 +134,16 @@
     executable: pip3
   when: is_amazon_linux | bool
 
-- name: Install python3-psycopg2 (Debian/Ubuntu)
+- name: Install python3-psycopg2 non-amazon linux
   become: yes
-  apt:
+  package:
     name: python3-psycopg2
     state: present
   when: not is_amazon_linux | bool
 
+# ------------------------------------------------
+# Superuser password
+# ------------------------------------------------
 - name: Set PostgreSQL superuser password (idempotent)
   become: yes
   become_user: postgres
@@ -122,4 +151,3 @@
     name: postgres
     password: "{{ db_admin_password }}"
     login_unix_socket: /var/run/postgresql
-

@@ -491,6 +491,7 @@ variable netskope_ips {
    default     = ["8.36.116.0/24" ,"8.39.144.0/24", "31.186.239.0/24", "163.116.128.0/17", "162.10.0.0/17"]
    type        = list(string)
 }
+
 variable "crdb_private_endpoint_dns" {
   description = "private endpoint for cockroach cloud"
   type        = string
@@ -517,11 +518,6 @@ variable "enable_private_dns" {
   default     = false
 }
 
-variable "run_ansible" {
-   description = "run the ansible"
-   type        = bool
-   default     = true
-}
 variable "project_name" {
    description = "project name to append to the owner"
    type        = string
@@ -545,4 +541,23 @@ variable "sql_user_name" {
 variable "sql_user_password" {
   description = "SQL user password"
   type        = string
+}
+variable "cockroach_api_token" {
+  description = "Cockroach Cloud API token (picks up from TF_VAR_cockroach_api_token)"
+  type        = string
+}
+
+variable "cockroach_api_key" {
+  description = "Cockroach Cloud API key (alternative to token)"
+  type        = string
+}
+
+variable "pe_service_id" {
+  description = "Cockroach Cloud prepivate endpoint resource id from the cockroach cloud UI"
+  type        = string
+}
+variable "run_ansible" {
+   description = "run the ansible"
+   type        = bool
+   default     = true
 }

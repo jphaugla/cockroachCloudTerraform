@@ -1,4 +1,0 @@
-localstack_image: localstack/localstack:latest
-localstack_port: 4566
-docker_users: {{ login_username }}
-

@@ -6,7 +6,7 @@ terraform {
     }
     azurerm   = {
       source  = "hashicorp/azurerm"
-      version = "~> 3.0"
+      version = "~> 4.5.0"
     }
     local     = {
       source  = "hashicorp/local"
@@ -19,3 +19,6 @@ terraform {
   }
 }
 
+provider "azurerm" {
+  features {}
+}

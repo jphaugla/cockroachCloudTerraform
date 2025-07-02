@@ -15,11 +15,6 @@ output "admin_ui_endpoint" {
   value       = cockroach_cluster.advanced.regions[0].ui_dns
 }
 
-output "crdb_private_endpoint_dns" {
-  description = "internal dns connection string"
-  value = cockroach_cluster.advanced.regions[0].internal_dns
-}
-
 output "crdb_public_endpoint_dns" {
   description = "public dns connection string"
   value = cockroach_cluster.advanced.regions[0].sql_dns
@@ -30,7 +25,21 @@ output "crdb_public_endpoint_dns" {
    id = cockroach_cluster.advanced.id
 }
 
-# output "crdb_private_endpoint_dns" {
-#   value = data.cockroach_cluster.advanced_fetch.sql_dns
-# }
-
+output "crdb_cluster_cert" {
+value  = data.cockroach_cluster_cert.cluster.cert
+}
+output "sql_user_name" {
+value      = var.sql_user_name
+}
+output "sql_user_password" {
+value  = var.sql_user_password
+}
+output "region" {
+value         = var.region_list[0]
+}
+output "owner" {
+value                            = var.owner
+}
+output "project_name" {
+value                     =  var.project_name
+}

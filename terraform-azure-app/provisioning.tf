@@ -5,9 +5,7 @@ resource "null_resource" "dummy" {}
 
 # Null Resource for Provisioning
 resource "null_resource" "provision" {
-  # only run the Ansible playbook if run_ansible = true
-  # and only when enable_private_dns = true
-  count = var.run_ansible && var.enable_private_dns ? 1 : 0
+  count = var.run_ansible ? 1 : 0
 
   triggers = {
     always_run = timestamp()
@@ -18,9 +16,10 @@ resource "null_resource" "provision" {
 
     command = <<EOT
 ansible-playbook \
-  -i '${var.playbook_instances_inventory_file}' \
-  --private-key '${var.ssh_private_key}' \
-  playbook.yml ${var.ansible_verbosity_switch} \
+  -u "${var.login_username}" \
+  -i "${var.playbook_instances_inventory_file}" \
+  --private-key "${var.ssh_private_key}" \
+  playbook.yml "${var.ansible_verbosity_switch}" \
   -e "db_admin_user=${var.sql_user_name}" \
   -e "db_admin_password=${var.sql_user_password}" \
   -e "region=${var.virtual_network_location}" \
@@ -30,7 +29,15 @@ ansible-playbook \
   -e "crdb_version=${var.crdb_version}" \
   -e "crdb_file_location=${var.crdb_file_location}" \
   -e "login_username=${var.login_username}" \
-  -e "include_app=${var.include_app}"
+  -e "include_app=${var.include_app}" \
+  -e "resource_group=${local.resource_group_name}" \
+  -e "vnet_name=${azurerm_virtual_network.vm01.name}" \
+  -e "subnet_name=${azurerm_subnet.private[0].name}" \
+  -e "cluster_id=${var.crdb_cluster_id}" \
+  -e "owner=${var.owner}" \
+  -e "pe_service_id=${var.pe_service_id}" \
+  -e "cockroach_api_token=${var.cockroach_api_token}" \
+  -e "cockroach_api_key=${var.cockroach_api_key}"
 EOT
   }
 

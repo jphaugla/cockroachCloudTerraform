@@ -1,0 +1,1 @@
+curl --request GET --url 'https://cockroachlabs.cloud/api/v1/auditlogevents?starting_from=2025-02-04T10:30:00Z&sort_order=DESC&limit=100'   --header "Authorization: Bearer ${COCKROACH_API_TOKEN}" --header "Cc-Version: 2024-09-16"

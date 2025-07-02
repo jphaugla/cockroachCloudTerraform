@@ -31,12 +31,18 @@ resource "azurerm_network_interface" "app" {
 
     ip_configuration {
     name                          = "network-interface-app-ip-${count.index}"
-    subnet_id                     = azurerm_subnet.private[0].id
+    subnet_id                     = azurerm_subnet.private[count.index].id
     private_ip_address_allocation = "Dynamic"
-    public_ip_address_id          =  azurerm_public_ip.app-ip[0].id
+    public_ip_address_id          =  azurerm_public_ip.app-ip[count.index].id
     }
 }
 
+resource "azurerm_user_assigned_identity" "app" {
+  name                = "${var.owner}-${var.resource_name}-uai"
+  resource_group_name = local.resource_group_name
+  location            = var.virtual_network_location
+  tags                = local.tags
+}
 
 resource "azurerm_linux_virtual_machine" "app" {
     count                 = var.include_app == "yes" ? var.app_nodes : 0
@@ -46,6 +52,10 @@ resource "azurerm_linux_virtual_machine" "app" {
     size                  = var.app_vm_size
     zone		  = local.app_zones[count.index%3]
     tags                  = local.tags
+    identity {
+      type         = "UserAssigned"
+      identity_ids = [azurerm_user_assigned_identity.app.id]
+    }
 
     network_interface_ids = [azurerm_network_interface.app[count.index].id]
 
@@ -69,5 +79,28 @@ resource "azurerm_linux_virtual_machine" "app" {
         storage_account_type = "Standard_LRS" # possible values: Standard_LRS, StandardSSD_LRS, Premium_LRS, Premium_SSD, StandardSSD_ZRS and Premium_ZRS
         disk_size_gb = var.app_disk_size
     }
-    
+    lifecycle {
+      ignore_changes = [
+        tags["LastModifiedBy"],        # ignore your auto-tags
+        # specifically ignore just the OS disk’s caching field
+        os_disk[0].caching,
+        # drop any boot diagnostics block Azure auto-populates
+        boot_diagnostics,
+      ]
+  }
 }
+resource "local_file" "cluster_cert" {
+  filename = "${var.playbook_working_directory}/temp/${var.virtual_network_location}/tls_cert"
+  content  = var.crdb_cluster_cert
+}
+
+# --------------------------------------------------
+# Grant the app VM’s system identity Blob Data Contributor on your storage account
+# --------------------------------------------------
+resource "azurerm_role_assignment" "app_write" {
+  count                = var.include_app == "yes" ? var.app_nodes : 0
+  scope                = azurerm_storage_account.app_storage.id
+  role_definition_name = "Storage Blob Data Contributor"
+  principal_id         = azurerm_user_assigned_identity.app.principal_id
+}
+

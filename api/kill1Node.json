@@ -1,0 +1,7 @@
+{
+	"regional_disruptor_specifications": [{
+		"region_code": "us-east-1",
+		"is_whole_region": false,
+		"pods": ["cockroachdb-lnwfr"]}
+	]
+}
