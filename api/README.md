@@ -1,6 +1,6 @@
 # **Disruption API Workflow**
 
-This document outlines the procedure for initiating and managing controlled disruptions in a CockroachDB Cloud cluster using scripts in the [cockroachCloudTerraform/api](https://github.com/jphaugla/cockroachCloudTerraform/tree/main/api) repository.
+This document outlines the procedure for initiating and managing controlled disruptions in a CockroachDB Cloud cluster using scripts in the [cockroachCloudTerraform/api](https://github.com/jphaugla/cockroachCloudTerraform/tree/main/api) repository.  The nodes will not automatically recover this is a testing tool to bring nodes/regions down to emulate failure situations.   The idea is to demonstrate that CockroachDB will be resilient and allow resilient applications to eliminate disruptions from failure situations.   The application needs proper retry capabilities to handle the gateway node for a SQL query being killed while the query is running.   Idea is to start the application and demonstrate the application will stay up and running as long as the application has proper retry capabilities set up.  Here is a [link describing proper application set up](https://www.cockroachlabs.com/docs/stable/advanced-client-side-transaction-retries)
 
 ---
 
