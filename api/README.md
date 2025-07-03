@@ -139,6 +139,3 @@ Before triggering any disruption:
 | 14         | `concurrent operation running` | A disruption was attempted while another operation was already in progress for the cluster. |
 
 ---
-
-Let me know if you want this converted into a publishable README, markdown doc, or PDF, or if you'd like automation added for any of these steps.
-
