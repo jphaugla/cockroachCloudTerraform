@@ -547,11 +547,6 @@ variable "cockroach_api_token" {
   type        = string
 }
 
-variable "cockroach_api_key" {
-  description = "Cockroach Cloud API key (alternative to token)"
-  type        = string
-}
-
 variable "pe_service_id" {
   description = "Cockroach Cloud prepivate endpoint resource id from the cockroach cloud UI"
   type        = string

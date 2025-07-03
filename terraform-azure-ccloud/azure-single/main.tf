@@ -34,5 +34,4 @@ netskope_ips = ["8.36.116.0/24" ,"8.39.144.0/24", "31.186.239.0/24", "163.116.12
 crdb_version = "25.2.1"
 ansible_verbosity_switch = "-vv"
 cockroach_api_token = var.cockroach_api_token
-cockroach_api_key   = var.cockroach_api_key
 }

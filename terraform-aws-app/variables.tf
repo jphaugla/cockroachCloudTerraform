@@ -5,13 +5,6 @@ variable "folder_path" {
   type        = string
 }
 
-
-variable "env_file" {
-  description = "Path to the shell file exporting COCKROACH_API_KEY and COCKROACH_API_TOKEN"
-  type        = string
-  default     = "~/.cockroachCloud/setEnv.sh"
-}
-
 variable "cloud_provider" {
   description = "Cloud provider for the cluster"
   type        = string

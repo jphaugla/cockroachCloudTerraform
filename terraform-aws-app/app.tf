@@ -10,6 +10,8 @@ resource "aws_instance" "app" {
     local.tags,
     { Name = "${var.owner}-crdb-app" }
   )
+  # attach the instance profile you created
+  iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
 
   network_interface {
     # will resolve to aws_network_interface.app[0].id when count = 1

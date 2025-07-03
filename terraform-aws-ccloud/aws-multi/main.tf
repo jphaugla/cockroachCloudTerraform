@@ -26,7 +26,7 @@ aws_config           = ["/Users/jasonhaugland/.aws2/config"]
 app_instance_type    = "t3.xlarge"
 aws_credentials      = ["/Users/jasonhaugland/.aws2/credentials"]
 crdb_service_name    = "jphaugla-api"
-run_ansible          = true
+run_ansible          = false
 node_count           = 3
 storage_gib          = 20
 folder_path          = "/Jphaugla"
@@ -41,4 +41,5 @@ my_ip_address        = "174.141.204.193"
 # ----------------------------------------
 netskope_ips = ["8.36.116.0/24" ,"8.39.144.0/24", "31.186.239.0/24", "163.116.128.0/17", "162.10.0.0/17"]
 crdb_version = "25.2.1"
+cockroach_api_token = var.cockroach_api_token
 }

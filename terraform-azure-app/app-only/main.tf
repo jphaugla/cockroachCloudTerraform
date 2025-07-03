@@ -55,7 +55,6 @@ module "app_nodes" {
 
   # Your manually-copied PSC ID
   pe_service_id                    = var.pe_service_id
-  include_load_balancer            = "yes"
   crdb_private_endpoint_dns = "internal-jphaugla-crdb-adv-nnv.azure-eastus2.cockroachlabs.cloud"
   run_ansible          = false
 }

@@ -36,8 +36,7 @@ ansible-playbook \
   -e "cluster_id=${var.crdb_cluster_id}" \
   -e "owner=${var.owner}" \
   -e "pe_service_id=${var.pe_service_id}" \
-  -e "cockroach_api_token=${var.cockroach_api_token}" \
-  -e "cockroach_api_key=${var.cockroach_api_key}"
+  -e "cockroach_api_token=${var.cockroach_api_token}" 
 EOT
   }
 

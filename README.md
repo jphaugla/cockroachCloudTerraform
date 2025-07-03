@@ -133,8 +133,9 @@ NOTES:
    ```
 8.  **set enable_private_dns to false**
     - edit main.tf to set specific values for the deployment
-    - ensure the COCKROACH_API_TOKEN environment variables are set
+    - ensure the COCKROACH_API_TOKEN environment variable is set
     - ensure the PE_Service ID environment variable is set
+    - ensure crdb_private_endpoint_dns environment variable is set
 9. **Initialize Terraform**
    ```bash
    terraform init

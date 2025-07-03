@@ -15,15 +15,15 @@
 #  gather_facts: no
 #  roles:
 #    - localstack
-#- hosts: all_public_node_ips
-#  gather_facts: no
-#  roles:
-#    - common
+- hosts: all_public_node_ips
+  gather_facts: no
+  roles:
+    - common
 - hosts: app_node_ips
   gather_facts: yes
   roles:
     - app-node
-#- hosts: app_node_ips
-#  gather_facts: yes
-#  roles:
-#    - replicator-molt
+- hosts: app_node_ips
+  gather_facts: yes
+  roles:
+    - replicator-molt

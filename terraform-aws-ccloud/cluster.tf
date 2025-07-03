@@ -5,7 +5,7 @@ data "cockroach_folder" "target" {
 }     
 
 resource "cockroach_cluster" "advanced" {
-  name           = "${var.owner}-${var.project_name}-adv"
+  name           = "${var.owner}-${var.project_name}-adv-aws"
   parent_id      = data.cockroach_folder.target.id   # put cluster in this folder :contentReference[oaicite:1]{index=1}
   cloud_provider = var.cloud_provider    # e.g. "AWS"
   plan           = var.plan              # "ADVANCED"

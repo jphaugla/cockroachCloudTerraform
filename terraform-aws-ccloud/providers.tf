@@ -14,3 +14,7 @@ terraform {
     }
   }
 }
+
+provider "cockroach" {
+  apikey = var.cockroach_api_token
+}
