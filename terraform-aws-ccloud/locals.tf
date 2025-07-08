@@ -22,5 +22,6 @@ locals {
     for r in cockroach_cluster.advanced.regions : r.sql_dns
   ]
   region_count = length(local.crdb_private_endpoint_dns_list)
+  default_region = var.aws_region_list[0]
 }
 

@@ -1,0 +1,14 @@
+# drop_user.yml
+- name: Drop CockroachDB user jhaugland before cluster destroy
+  hosts: localhost
+  gather_facts: false
+  tasks:
+    - name: Drop user with CASCADE
+      community.postgresql.postgresql_query:
+        db: defaultdb
+        login_user: "{{ admin_user }}"
+        login_password: "{{ admin_password }}"
+        login_host: "{{ db_host }}"
+        port: 26257
+        query: "DROP USER IF EXISTS jhaugland CASCADE;"
+

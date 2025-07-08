@@ -6,7 +6,12 @@ resource "cockroach_private_endpoint_services" "aws" {
 
 resource "aws_vpc_endpoint" "crdb" {
   vpc_id            = aws_vpc.main.id
-  service_name      = cockroach_private_endpoint_services.aws.services_map[var.aws_region].name
+  service_name = lookup(
+     cockroach_private_endpoint_services.aws.services_map,
+     var.aws_region,
+     values(cockroach_private_endpoint_services.aws.services_map)[0],
+   ).name
+
   vpc_endpoint_type = "Interface"
   subnet_ids        = aws_subnet.private_subnets[*].id
   security_group_ids = [module.sg_application.security_group_id]

@@ -166,6 +166,16 @@ cockroach sql --url="$DATABASE_URL"
 ```
 
 ## Cleanup
+Before destroy, drop the sql  user name that is created (example is jhaugland).  Without dropping the user, the destroy cluster will fail.
+
+```bash
+drop owned by jhaugland;
+DROP DATABASE IF EXISTS ecommerce CASCADE;
+DROP DATABASE IF EXISTS employees CASCADE;
+DROP DATABASE IF EXISTS kv CASCADE;
+drop user jhaugland;
+```
+check for any other databases by doing *SHOW DATABASES*.   drop any of those databases if owned by jhaugland
 
 To destroy everything:
 

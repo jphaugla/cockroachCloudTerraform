@@ -3,17 +3,20 @@
 # ──────────────────────────────────────────────────────────────────────────────
 # 1) AWS provider aliases for each region
 # ──────────────────────────────────────────────────────────────────────────────
+# at top of file, make sure you have:
 provider "aws" {
   alias  = "region0"
   region = var.aws_region_list[0]
 }
+
 provider "aws" {
   alias  = "region1"
-  region = var.aws_region_list[1]
+  region = local.region_count > 1 ? var.aws_region_list[1] : local.default_region
 }
+
 provider "aws" {
   alias  = "region2"
-  region = var.aws_region_list[2]
+  region = local.region_count > 2 ? var.aws_region_list[2] : local.default_region
 }
 
 
