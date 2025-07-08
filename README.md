@@ -43,10 +43,10 @@ This repository contains Terraform/Ansible configurations to provision and manag
    - **AWS credentials**: Configure via environment variables or `~/.aws/credentials`.
    - **Azure credentials**: az login
 3. **Cockroach Cloud API TOKEN**:
-   ```bash
+```bash
 export COCKROACH_API_TOKEN=CCDB1_BLAHkjC2MBLAHXGZ6SyyYc_BLAHULj7mwmBLAHz3I84svqdBLAHchx33InBLAH
 export TF_VAR_cockroach_api_token="${COCKROACH_API_TOKEN}"
-   ```
+```
 
 ## Quick Start for AWS
 NOTES: 
