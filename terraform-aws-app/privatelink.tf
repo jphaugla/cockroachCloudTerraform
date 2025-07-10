@@ -29,9 +29,12 @@ resource "cockroach_private_endpoint_trusted_owner" "aws_account" {
 }
 
 resource "cockroach_private_endpoint_connection" "aws" {
-  depends_on = [cockroach_private_endpoint_trusted_owner.aws_account]
   cluster_id  = var.crdb_cluster_id
   endpoint_id = aws_vpc_endpoint.crdb.id
+  depends_on = [
+    cockroach_private_endpoint_trusted_owner.aws_account,
+    aws_vpc_endpoint.crdb
+  ]
 }
 # → this calls the Cloud API to “add” your VPCE to the cluster’s PrivateLink allowlist :contentReference[oaicite:2]{index=2}
 

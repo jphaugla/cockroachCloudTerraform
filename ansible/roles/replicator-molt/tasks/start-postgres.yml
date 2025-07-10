@@ -1,0 +1,41 @@
+---
+# roles/replicator-molt/tasks/start-postgres.yml
+- name: Debug OS information
+  become: yes
+  debug:
+    msg: >
+      The operating system is {{ ansible_facts['distribution'] }}
+      and the version is {{ ansible_facts['distribution_version'] }}
+
+- name: Set variable if Amazon Linux
+  set_fact:
+    is_amazon_linux: "{{ ansible_facts['distribution'] == 'Amazon' }}"
+# ------------------------------------------------
+# Service start & enable
+# ------------------------------------------------
+- name: Start PostgreSQL (non-Amazon)
+  become: yes
+  systemd:
+    name: postgresql-15
+    state: started
+    enabled: yes
+  when: not is_amazon_linux | bool
+
+- name: Start PostgreSQL (Amazon)
+  become: yes
+  systemd:
+    name: postgresql
+    state: started
+    enabled: yes
+  when: is_amazon_linux | bool
+
+# ------------------------------------------------
+# Superuser password
+# ------------------------------------------------
+- name: Set PostgreSQL superuser password (idempotent)
+  become: yes
+  become_user: postgres
+  community.postgresql.postgresql_user:
+    name: postgres
+    password: "{{ db_admin_password }}"
+    login_unix_socket: /var/run/postgresql

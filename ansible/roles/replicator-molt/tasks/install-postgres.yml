@@ -106,25 +106,6 @@
       hot_standby = on
 
 # ------------------------------------------------
-# Service start & enable
-# ------------------------------------------------
-- name: Start PostgreSQL (non-Amazon)
-  become: yes
-  systemd:
-    name: postgresql-15
-    state: started
-    enabled: yes
-  when: not is_amazon_linux | bool
-
-- name: Start PostgreSQL (Amazon)
-  become: yes
-  systemd:
-    name: postgresql
-    state: started
-    enabled: yes
-  when: is_amazon_linux | bool
-
-# ------------------------------------------------
 # Client libs for Python
 # ------------------------------------------------
 - name: Install psycopg2-binary (Amazon Linux 2023)
@@ -140,14 +121,3 @@
     name: python3-psycopg2
     state: present
   when: not is_amazon_linux | bool
-
-# ------------------------------------------------
-# Superuser password
-# ------------------------------------------------
-- name: Set PostgreSQL superuser password (idempotent)
-  become: yes
-  become_user: postgres
-  community.postgresql.postgresql_user:
-    name: postgres
-    password: "{{ db_admin_password }}"
-    login_unix_socket: /var/run/postgresql

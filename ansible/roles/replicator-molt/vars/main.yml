@@ -6,6 +6,7 @@ install_java_maven_go: true
 add_githubs: true
 package_java_app: true
 install_postgres: true
+start_postgres: false
 init_postgres: true
 #  this takes a really long time on a small machine
 install_employee_sample: false
