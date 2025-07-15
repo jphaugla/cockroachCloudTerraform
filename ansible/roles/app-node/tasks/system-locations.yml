@@ -1,0 +1,39 @@
+- name: Debug OS information
+  become: yes
+  debug:
+    msg: >
+      The operating system is {{ ansible_facts['distribution'] }}
+      and the version is {{ ansible_facts['distribution_version'] }}
+
+- name: Set variable if Amazon Linux
+  set_fact:
+    is_amazon_linux: "{{ ansible_facts['distribution'] == 'Amazon' }}"
+
+- name: copy create when is amazon system_locations.sql 
+  copy:
+    src: azure_system_locations.sql
+    dest: "/home/{{ login_username }}/system_locations.sql"
+    mode: '0644'
+  when:
+    - not is_amazon_linux|bool
+
+- name: copy create when is not amazon system_locations.sql 
+  copy:
+    src: aws_system_locations.sql
+    dest: "/home/{{ login_username }}/system_locations.sql"
+    mode: '0644'
+  when:
+    - is_amazon_linux|bool
+
+- name: copy system_locations script
+  ansible.builtin.template:
+    src: system_locations.j2
+    dest: system_locations.sh
+    owner: "{{ login_username }}"
+    group: "{{ login_username }}"
+    mode: '0755'
+
+- name: run system_locations to install locations
+  ansible.builtin.command: bash ./system_locations.sh
+  args:
+    chdir: /home/{{ login_username }}

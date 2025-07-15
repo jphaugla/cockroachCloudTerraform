@@ -88,3 +88,6 @@
     owner: "{{ login_username }}"
     group: "{{ login_username }}"
     mode: '0755'
+
+- name: add system locations for the system map
+  include_tasks: system-locations.yml

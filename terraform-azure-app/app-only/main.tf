@@ -30,7 +30,7 @@ module "app_nodes" {
   app_disk_size                    = 128
   my_ip_address                    = "174.141.204.193"
   netskope_ips                     = ["8.36.116.0/24", "8.39.144.0/24", "31.186.239.0/24", "163.116.128.0/17", "162.10.0.0/17", "69.120.106.187"]
-  crdb_version = "25.2.1"
+  crdb_version = "25.2.2"
 
   # CRDB info from Phase 1
   crdb_cluster_id                  = data.terraform_remote_state.cluster.outputs.crdb_cluster_id
