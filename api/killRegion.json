@@ -1,7 +1,6 @@
 {
 	"regional_disruptor_specifications": [{
 		"region_code": "us-west-2",
-		"is_whole_region": true
-		}
+		"is_whole_region": true }
 	]
 }

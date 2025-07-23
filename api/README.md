@@ -1,6 +1,6 @@
 # **Disruption API Workflow**
 
-This document outlines the procedure for initiating and managing controlled disruptions in a CockroachDB Cloud cluster using scripts in the [cockroachCloudTerraform/api](https://github.com/jphaugla/cockroachCloudTerraform/tree/main/api) repository.  The nodes will not automatically recover this is a testing tool to bring nodes/regions down to emulate failure situations.   The idea is to demonstrate that CockroachDB will be resilient and allow resilient applications to eliminate disruptions from failure situations.   The application needs proper retry capabilities to handle the gateway node for a SQL query being killed while the query is running.   Idea is to start the application and demonstrate the application will stay up and running as long as the application has proper retry capabilities set up.  Here is a [link describing proper application set up](https://www.cockroachlabs.com/docs/stable/advanced-client-side-transaction-retries)
+This document outlines the procedure for initiating and managing controlled disruptions in a CockroachDB Cloud cluster using scripts in the [cockroachCloudTerraform/api](https://github.com/jphaugla/cockroachCloudTerraform/tree/main/api) repository.
 
 ---
 
@@ -9,6 +9,7 @@ This document outlines the procedure for initiating and managing controlled disr
 ### **Create a Service Account and API Token**
 
 Follow the official CockroachDB documentation to set up a service account and generate an API token:
+NOTE:  to see the cluster from the API, cluster admin is needed on the cluster, or the organization.  If the cluster is in a folder, cluster admin on the folder works as well.
 
 🔗 [Manage Service Accounts — CockroachDB Docs](https://www.cockroachlabs.com/docs/cockroachcloud/managing-access#manage-service-accounts)
 
@@ -139,3 +140,6 @@ Before triggering any disruption:
 | 14         | `concurrent operation running` | A disruption was attempted while another operation was already in progress for the cluster. |
 
 ---
+
+Let me know if you want this converted into a publishable README, markdown doc, or PDF, or if you'd like automation added for any of these steps.
+
