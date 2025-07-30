@@ -1,9 +1,10 @@
+export AWS_REGION={{ region }}
+export AWS_DEFAULT_REGION={{ region }}
 molt fetch \
 --source 'postgres://postgres:{{ db_admin_password }}@localhost:5432/employees?sslmode=disable' \
 --target 'postgresql://{{ db_admin_user }}:{{ db_admin_password }}@{{load_balancer_private_ip}}:26257/employees?sslmode=verify-full&sslrootcert=/home/{{ login_username }}/certs/ca.crt' \
---bucket-path 's3://jhaug-east2-molt-bucket/incoming/' \
---import-region 'us-east-2' \
+--bucket-path 's3://{{ bucket_name }}/incoming/' \
+--import-region '{{ region }}' \
 --allow-tls-mode-disable \
---use-implicit-auth \
 --logging trace \
 --table-handling none

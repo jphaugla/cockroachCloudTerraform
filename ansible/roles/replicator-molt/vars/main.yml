@@ -3,13 +3,15 @@ save_ips: true
 maven_version: '3.9.6'
 #  this works fine but the maven version keeps changing so setting to true
 install_java_maven_go: true
+#  default set to false as it starts postgresql
+install_molt_replicator: true
 add_githubs: true
 package_java_app: true
 install_postgres: true
-start_postgres: false
+start_postgres: true
 init_postgres: true
 #  this takes a really long time on a small machine
-install_employee_sample: false
+install_employee_sample: true
 setup_crdb_employee: true
 install_nodejs_typescript: true
 nvm_version: "0.39.1"

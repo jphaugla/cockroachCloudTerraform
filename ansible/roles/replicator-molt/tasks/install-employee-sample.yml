@@ -21,7 +21,7 @@
   become: yes
   become_user: postgres
   shell:
-    cmd:  "pg_restore -v -d employees -U {{ db_admin_user }} -Fc  /tmp/employees.sql.gz --no-privileges --no-owner -c"
+    cmd:  "pg_restore -v -d employees -U postgres -Fc  /tmp/employees.sql.gz --no-privileges --no-owner -c"
   ignore_errors: true
 
 - name: copy move schema

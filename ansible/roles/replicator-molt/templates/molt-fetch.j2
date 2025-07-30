@@ -1,4 +1,4 @@
-molt fetch --source "postgres://{{ db_admin_user }}:{{ db_admin_password }}@localhost:5432/employees" \
---target 'postgresql://{{ db_admin_user }}:{{ db_admin_password }}@{{load_balancer_private_ip}}:26257/employees?sslmode=verify-full&sslrootcert=/home/{{ login_username }}/certs/ca.crt' \
+molt fetch --source "postgresql://postgres:{{ db_admin_password }}@localhost:5432/employees" \
+--target 'postgresql://postgres:{{ db_admin_password }}@{{load_balancer_private_ip}}:26257/employees?sslmode=verify-full&sslrootcert=/home/{{ login_username }}/certs/ca.crt' \
 --table-handling 'drop-on-target-and-recreate' \
  --direct-copy  --non-interactive

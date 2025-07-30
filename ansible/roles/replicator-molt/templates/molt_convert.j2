@@ -1,4 +1,5 @@
 molt convert postgres \
---url 'postgresql://{{ db_admin_user }}@{{load_balancer_private_ip}}:26257/?sslmode=verify-full&sslrootcert=/home/{{ login_username }}/certs/ca.crt' \
+--url 'postgresql://postgres:{{ db_admin_password }}@{{load_balancer_private_ip}}:26257/?sslmode=verify-full&sslrootcert=/home/{{ login_username }}/certs/ca.crt' \
 --schema employees.sql \
+--format crdb \
 --out employees_converted.sql

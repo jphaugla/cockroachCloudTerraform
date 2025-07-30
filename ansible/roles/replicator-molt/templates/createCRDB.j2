@@ -1,1 +1,1 @@
-/usr/local/bin/cockroach sql --url='postgresql://{{ db_admin_user }}:{{ db_admin_password }}@{{load_balancer_private_ip}}:26257/bank?sslmode=verify-full&sslrootcert=/home/{{ login_username }}/certs/ca.crt' --file /tmp/createCRDB.sql
+/usr/local/bin/cockroach sql --url='postgresql://postgres:{{ db_admin_password }}@{{load_balancer_private_ip}}:26257/bank?sslmode=verify-full&sslrootcert=/home/{{ login_username }}/certs/ca.crt' --file /tmp/createCRDB.sql

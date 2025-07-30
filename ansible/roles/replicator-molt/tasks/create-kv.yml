@@ -1,9 +1,6 @@
 - name: create kv database
   command: "{{ lookup('template','create-kv-db.j2') }}"
 
-- name: create dead letter queue
-  command: "{{ lookup('template','dead-letter-kv.j2') }}"
-
 - name: create kv table
   command: "{{ lookup('template','create-kv-table.j2') }}"
 

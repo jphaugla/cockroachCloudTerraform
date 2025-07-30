@@ -1,0 +1,3 @@
+create user if not exists postgres with login password '{{ db_admin_password }}';
+grant all on database defaultdb to postgres;
+grant admin to postgres;

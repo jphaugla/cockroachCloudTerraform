@@ -1,6 +1,11 @@
 - meta: end_play
   when: setup_migration != "yes"
 
+- name: install molt and replicator
+  include_tasks: install-molt-replicator.yml
+  when:
+    - install_molt_replicator|bool
+
 - name: install postgres
   include_tasks: install-postgres.yml
   when:

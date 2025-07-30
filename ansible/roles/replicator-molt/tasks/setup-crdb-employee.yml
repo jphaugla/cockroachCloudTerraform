@@ -4,5 +4,26 @@
     dest: /tmp/createCRDB.sql
     mode: '0644'
 
+- name: create postgres user if not exists for cockroach
+  ansible.builtin.template:
+    src: create_postgres_user.j2
+    dest: create_postgres_user.sql
+    owner: "{{ login_username }}"
+    group: "{{ login_username }}"
+    mode: '0755'
+
+- name: create postgres user shell script
+  ansible.builtin.template:
+    src: create_postgres_sh.j2
+    dest: create_postgres_user.sh
+    owner: "{{ login_username }}"
+    group: "{{ login_username }}"
+    mode: '0755'
+
+- name: run system_locations to install locations
+  ansible.builtin.command: bash ./create_postgres_user.sh
+  args:
+    chdir: /home/{{ login_username }}
+
 - name: create employee database if not exists for cockroach
   command: "{{ lookup('template','createCRDB.j2') }}"

@@ -50,8 +50,6 @@ module "app_nodes" {
   instances_inventory_directory      = "temp"
   inventory_template_file            = "templates/inventory.tpl"
   ansible_verbosity_switch           =  "-v"
-  cockroach_api_token              = var.cockroach_api_token
-  cockroach_api_key                = var.cockroach_api_key
 
   # Your manually-copied PSC ID
   pe_service_id                    = var.pe_service_id

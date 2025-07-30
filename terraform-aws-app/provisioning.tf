@@ -30,6 +30,7 @@ ansible-playbook \
   -e "crdb_version=${var.crdb_version}" \
   -e "crdb_file_location=${var.mount_file_location}" \
   -e "login_username=${local.admin_username}" \
+  -e "bucket_name=${local.bucket_name}" \
   -e "include_app=${var.include_app}"
 EOT
   }

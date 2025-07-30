@@ -542,10 +542,6 @@ variable "sql_user_password" {
   description = "SQL user password"
   type        = string
 }
-variable "cockroach_api_token" {
-  description = "Cockroach Cloud API token (picks up from TF_VAR_cockroach_api_token)"
-  type        = string
-}
 
 variable "pe_service_id" {
   description = "Cockroach Cloud prepivate endpoint resource id from the cockroach cloud UI"
