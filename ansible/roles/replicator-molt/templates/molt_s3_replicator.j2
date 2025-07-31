@@ -1,6 +1,7 @@
 export AWS_REGION={{ region }}
 export AWS_DEFAULT_REGION={{ region }}
-molt fetch \
+#  this is temporary fix to run against a local copy of molt so molt finds the replicator binary
+./molt fetch \
 --source 'postgres://postgres:{{ db_admin_password }}@localhost:5432/employees?sslmode=disable' \
 --target 'postgresql://postgres:{{ db_admin_password }}@{{load_balancer_private_ip}}:26257/employees?sslmode=verify-full&sslrootcert=/home/{{ login_username }}/certs/ca.crt' \
 --bucket-path 's3://{{ bucket_name }}/incoming/' \

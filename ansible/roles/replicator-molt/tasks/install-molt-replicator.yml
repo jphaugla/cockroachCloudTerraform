@@ -25,3 +25,14 @@
   loop:
     - molt
     - replicator
+
+- name: Copy molt & replicator into user’s home directory
+  become: yes
+  copy:
+    remote_src: yes
+    src: "/opt/{{ item }}"
+    dest: "/home/{{ login_username }}/{{ item }}"
+    mode: '0755'
+  loop:
+    - molt
+    - replicator
