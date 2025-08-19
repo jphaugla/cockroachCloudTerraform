@@ -9,6 +9,12 @@ if [[ -z "${COCKROACH_API_TOKEN}" ]]; then
 else
     echo "COCKROACH_API_TOKEN is set and not empty."
 fi
+if [[ -z "${API_URL}" ]]; then
+    echo "API_URL is unset or empty."
+else
+    echo "API_URL is set and not empty."
+    echo ${API_URL}
+fi
 if [ -z "$1" ]; then
   echo "Error: The first parameter is not set or is empty. First parameter must contain the user name to delete"
   exit 1
