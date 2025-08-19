@@ -1,0 +1,102 @@
+---
+- name: Ensure grafana service is started and enabled
+  become: true
+  ansible.builtin.systemd:
+    daemon_reload: true
+    name: grafana-server
+    state: started
+    enabled: true
+  tags: [grafana_run, grafana_configure]
+
+- name: Wait for Grafana API to be ready
+  ansible.builtin.uri:
+    url: "{{ grafana_api_url | default('http://localhost:3000') }}/api/health"
+    status_code: 200
+  register: grafana_health
+  retries: 30
+  delay: 2
+  until: grafana_health.status == 200
+  tags: [grafana_configure]
+
+- name: Change Grafana admin password
+  become: yes
+  ansible.builtin.shell:
+    cmd: "grafana-cli admin reset-admin-password {{ (grafana_admin_password | default(db_admin_password)) | quote }}"
+  tags: [grafana_configure]
+
+- name: Create Prometheus datasource
+  community.grafana.grafana_datasource:
+    name: prometheus
+    ds_type: prometheus
+    ds_url: "{{ prometheus_url | default('http://localhost:9090') }}"  # Prometheus endpoint
+    access: proxy
+    url: "{{ grafana_api_url | default('http://localhost:3000') }}"    # Grafana API
+    url_username: "{{ grafana_admin_user | default('admin') }}"
+    url_password: "{{ grafana_admin_password | default(db_admin_password) }}"
+    enforce_secure_data: true
+  tags: [grafana_configure]
+
+# Variables (override in group_vars/host_vars if you like)
+- name: Set CRDB dashboard defaults
+  ansible.builtin.set_fact:
+    crdb_dashboards_dir: /etc/grafana/dashboards
+    crdb_dashboards_base_url: "https://raw.githubusercontent.com/cockroachdb/cockroach/master/monitoring/grafana-dashboards/by-cluster"
+    crdb_dashboards:
+      - changefeeds
+      - crosscluster_replication
+      - distributed
+      - hardware
+      - overview
+      - queues
+      - replication
+      - runtime
+      - slow_request
+      - sql
+      - storage
+    # Toggle this off if you are scraping self-hosted metrics instead of Cloud Dedicated
+    use_cloud_metrics: "{{ use_cloud_metrics | default(true) }}"
+  tags: [grafana_configure]
+
+- name: Ensure dashboards dir exists
+  become: yes
+  ansible.builtin.file:
+    path: "{{ crdb_dashboards_dir }}"
+    state: directory
+    mode: '0755'
+  tags: [grafana_configure]
+
+# Download each dashboard (ignore 404s so a typo/missing file doesn’t break the run)
+- name: Download CockroachDB dashboards (by-cluster)
+  become: yes
+  ansible.builtin.get_url:
+    url: "{{ crdb_dashboards_base_url }}/{{ item }}.json"
+    dest: "{{ crdb_dashboards_dir }}/{{ item }}.json"
+    mode: '0644'
+  loop: "{{ crdb_dashboards }}"
+  ignore_errors: yes
+  tags: [grafana_configure]
+
+# Find every JSON that exists in the directory (whatever downloaded successfully)
+- name: Find downloaded dashboards
+  ansible.builtin.find:
+    paths: "{{ crdb_dashboards_dir }}"
+    patterns: "*.json"
+    file_type: file
+  register: crdb_dashboards_found
+  tags: [grafana_configure]
+
+# ---------------------------
+# Import 
+# ---------------------------
+- name: Import Grafana dashboards (all found)
+  community.grafana.grafana_dashboard:
+    state: present
+    commit_message: Updated by ansible
+    overwrite: true
+    path: "{{ item.path }}"
+    url: "{{ grafana_api_url | default('http://localhost:3000') }}"
+    url_username: "{{ grafana_admin_user | default('admin') }}"
+    url_password: "{{ grafana_admin_password | default(db_admin_password) }}"
+  loop: "{{ crdb_dashboards_found.files }}"
+  when: crdb_dashboards_found.matched | int > 0
+  tags: [grafana_configure]

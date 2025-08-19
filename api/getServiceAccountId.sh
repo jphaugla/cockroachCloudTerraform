@@ -1,4 +1,4 @@
-COCKROACH_SERVICE_NAME=jphaugla-api
+COCKROACH_SERVICE_NAME=jhaugland-byoc
 # get the nodes for the cluster
 if [[ -z "${CLUSTER_ID}" ]]; then
     echo "CLUSTER_ID is unset or empty."
@@ -10,8 +10,14 @@ if [[ -z "${COCKROACH_API_TOKEN}" ]]; then
 else
     echo "COCKROACH_API_TOKEN is set and not empty."
 fi
+if [[ -z "${API_URL}" ]]; then
+    echo "API_URL is unset or empty."
+else
+    echo "API_URL is set and not empty."
+    echo ${API_URL}
+fi
 curl --request GET \
---url "https://cockroachlabs.cloud/api/v1/service-accounts?cluster_id=${CLUSTER_ID}" \
+--url "https://${API_URL}/api/v1/service-accounts?cluster_id=${CLUSTER_ID}" \
 --header "Authorization: Bearer $COCKROACH_API_TOKEN" \
 --header "Cc-Version: 2024-09-16" \
 | jq -r --arg name "$COCKROACH_SERVICE_NAME" ' .service_accounts[] | select(.name == $name) '

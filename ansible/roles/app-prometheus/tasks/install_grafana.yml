@@ -1,0 +1,164 @@
+---
+- name: Debug OS information
+  become: yes
+  ansible.builtin.debug:
+    msg: "Distribution={{ ansible_facts['distribution'] }}  pkg_mgr={{ ansible_facts['pkg_mgr'] }}"
+
+# ----------------------------------------
+# Install the package
+# ----------------------------------------
+# RHEL/CentOS/Amazon
+- name: Ensure rpm-gpg dir exists (RHEL/CentOS/Amazon)
+  become: yes
+  ansible.builtin.file:
+    path: /etc/pki/rpm-gpg
+    state: directory
+    mode: '0755'
+  when: ansible_facts['pkg_mgr'] in ['yum', 'dnf']
+
+- name: Download Grafana GPG key (RHEL/CentOS/Amazon)
+  become: yes
+  ansible.builtin.get_url:
+    url: https://rpm.grafana.com/gpg.key
+    dest: /etc/pki/rpm-gpg/RPM-GRAFANA-GPG-KEY
+    mode: '0644'
+  when: ansible_facts['pkg_mgr'] in ['yum', 'dnf']
+
+- name: Import Grafana GPG key (RHEL/CentOS/Amazon)
+  become: yes
+  ansible.builtin.rpm_key:
+    key: /etc/pki/rpm-gpg/RPM-GRAFANA-GPG-KEY
+    state: present
+  when: ansible_facts['pkg_mgr'] in ['yum', 'dnf']
+
+- name: Add Grafana YUM repo
+  become: yes
+  ansible.builtin.template:
+    src: grafana.repo.j2
+    dest: /etc/yum.repos.d/grafana.repo
+    mode: '0644'
+  when: ansible_facts['pkg_mgr'] in ['yum', 'dnf']
+
+- name: Install Grafana (RHEL/CentOS/Amazon)
+  become: yes
+  ansible.builtin.dnf:
+    name: grafana
+    state: latest
+  when: ansible_facts['pkg_mgr'] in ['yum', 'dnf']
+
+# Debian/Ubuntu
+- name: Install prerequisites for apt (Debian/Ubuntu)
+  become: yes
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - software-properties-common
+      - wget
+    state: latest
+    update_cache: yes
+  when: ansible_facts['pkg_mgr'] == 'apt'
+
+- name: Add Grafana GPG key (Debian/Ubuntu)
+  become: yes
+  ansible.builtin.apt_key:
+    url: https://packages.grafana.com/gpg.key
+    state: present
+  when: ansible_facts['pkg_mgr'] == 'apt'
+
+- name: Add Grafana APT repo (Debian/Ubuntu)
+  become: yes
+  ansible.builtin.apt_repository:
+    repo: "deb https://packages.grafana.com/oss/deb stable main"
+    filename: grafana
+    state: present
+  when: ansible_facts['pkg_mgr'] == 'apt'
+
+- name: Update apt cache (Debian/Ubuntu)
+  become: yes
+  ansible.builtin.apt:
+    update_cache: yes
+  when: ansible_facts['pkg_mgr'] == 'apt'
+
+- name: Install Grafana (Debian/Ubuntu)
+  become: yes
+  ansible.builtin.apt:
+    name: grafana
+    state: latest
+  when: ansible_facts['pkg_mgr'] == 'apt'
+
+# ----------------------------------------
+# Discover the right binary and compute ExecStart
+# ----------------------------------------
+- name: Check for real grafana binary
+  become: yes
+  ansible.builtin.stat:
+    path: /usr/share/grafana/bin/grafana
+  register: grafana_real
+
+- name: Check for legacy grafana-server binary in /usr/share
+  become: yes
+  ansible.builtin.stat:
+    path: /usr/share/grafana/bin/grafana-server
+  register: grafana_legacy
+  when: not grafana_real.stat.exists
+
+- name: Find wrapper grafana-server under /usr/sbin (fallback)
+  become: yes
+  ansible.builtin.find:
+    paths: [/usr/sbin]
+    patterns: grafana-server
+    file_type: file
+    recurse: no
+  register: grafana_wrapper
+  when: not grafana_real.stat.exists and (not grafana_legacy.stat.exists | default(true))
+
+- name: Set grafana_exec (exact ExecStart command prefix)
+  ansible.builtin.set_fact:
+    grafana_exec: >-
+      {{ '/usr/share/grafana/bin/grafana server' if grafana_real.stat.exists else
+         ('/usr/share/grafana/bin/grafana-server' if (grafana_legacy.stat.exists | default(false)) else
+          grafana_wrapper.files[0].path) }}
+
+- name: Fail if no grafana binary was found
+  ansible.builtin.fail:
+    msg: "No grafana binary found (checked /usr/share/grafana/bin/{grafana,grafana-server} and /usr/sbin/grafana-server)"
+  when: grafana_exec is not defined
+
+# ----------------------------------------
+# Environment, dirs & systemd unit
+# ----------------------------------------
+- name: Choose envfile path by OS family
+  ansible.builtin.set_fact:
+    grafana_envfile: >-
+      {{ '/etc/sysconfig/grafana-server'
+         if ansible_os_family in ['RedHat','Rocky','Alma','OracleLinux','Amazon']
+         else '/etc/default/grafana-server' }}
+
+- name: Create Grafana data/log/plugin dirs
+  become: yes
+  ansible.builtin.file:
+    path: "{{ item }}"
+    state: directory
+    owner: grafana
+    group: grafana
+    mode: '0755'
+  loop:
+    - "{{ grafana_data_dir | default('/var/lib/grafana') }}"
+    - "{{ grafana_log_dir | default('/var/log/grafana') }}"
+    - "{{ grafana_plugins_dir | default('/var/lib/grafana/plugins') }}"
+
+- name: Render Grafana environment file
+  become: yes
+  ansible.builtin.template:
+    src: grafana.env.j2
+    dest: "{{ grafana_envfile }}"
+    mode: '0644'
+  notify: restart grafana-server
+
+- name: Create systemd service unit for Grafana
+  become: yes
+  ansible.builtin.template:
+    src: grafana.service.j2
+    dest: /etc/systemd/system/grafana-server.service
+    mode: '0644'
+  notify: restart grafana-server

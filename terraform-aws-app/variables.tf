@@ -92,17 +92,6 @@ variable "aws_region" {
    type        = string
 }
 
-variable "aws_config" {
-   description = "aws config file"
-   type        = list(string)
-}
-
-variable "aws_credentials" {
-   description = "aws credentials directory"
-   type        = list(string)
-}
-
-
 variable "node_count" {
    description = "the number of nodes"
    type        = number
@@ -245,3 +234,48 @@ variable "crdb_service_name" {
       default     = false
     }
 
+    variable "enable_privatelink" {
+      description = "Whether to enable privatelink"
+      type        = bool
+      default     = true
+    }
+# ----------------------------------------
+# Kafka Instance Specifications
+# ----------------------------------------
+    variable "include_kafka" {
+      description = "'yes' or 'no' to include an kafka Instance"
+      type        = string
+      default     = "yes"
+      validation {
+        condition = contains(["yes", "no"], var.include_kafka)
+        error_message = "Valid value for variable 'include_kafka' is : 'yes' or 'no'"
+      }
+    }
+
+    variable "kafka_instance_type" {
+      description = "Kafka Instance Type"
+      type        = string
+      default     = "t3a.small"
+    }
+ variable "prometheus_string" {
+      description = "The prometheus string to use at start-up.  Do not supply a value"
+      type        = string
+      default     = ""
+    }
+
+    variable "prometheus_app_string" {
+      description = "The  prometheus string to use at start-up.  Do not supply a value"
+      type        = string
+      default     = ""
+    }
+
+    variable "cockroach_api_token" {
+      description = "Cockroach Cloud API token (picks up from TF_VAR_cockroach_api_token)"
+      type        = string
+    }
+
+    variable "crdb_cloud_url" {
+      description = "Cockroach Cloud API url"
+      type        = string
+      default     = "management-staging.crdb.io"
+    }

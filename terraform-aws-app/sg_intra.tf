@@ -24,6 +24,12 @@ module "security_group_intra" {
       protocol    = "tcp"
       description = "Allow HTTP (8080) from within VPC"
     },
+    {
+      from_port   = 9092
+      to_port     = 9092
+      protocol    = "tcp"
+      description = "Allow HTTP (9092) from within VPC"
+    },
   ]
 
   egress_rules = ["all-all"]

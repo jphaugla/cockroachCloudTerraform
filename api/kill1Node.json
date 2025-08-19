@@ -2,6 +2,6 @@
 	"regional_disruptor_specifications": [{
 		"region_code": "us-east-2",
 		"is_whole_region": false,
-		"pods": ["cockroachdb-jzslm"]}
+		"pods": ["cockroachdb-nwnvk"]}
 	]
 }

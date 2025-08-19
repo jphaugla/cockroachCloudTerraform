@@ -1,0 +1,71 @@
+[Unit]
+Description=Grafana instance
+Documentation=http://docs.grafana.org
+Wants=network-online.target
+After=network-online.target
+After=postgresql.service mariadb.service mysqld.service influxdb.service
+
+[Service]
+# Read env from both Debian/Ubuntu and RHEL/Amazon (optional files)
+EnvironmentFile=-/etc/default/grafana-server
+EnvironmentFile=-/etc/sysconfig/grafana-server
+
+User=grafana
+Group=grafana
+Type=notify
+Restart=on-failure
+# Accept sd_notify() from any process in the cgroup (wrapper vs real binary)
+NotifyAccess=all
+
+# ensure you're in the grafana home
+WorkingDirectory=/usr/share/grafana
+
+# runtime directories
+RuntimeDirectory=grafana
+RuntimeDirectoryMode=0750
+
+# Computed in Ansible as either:
+#   /usr/share/grafana/bin/grafana server
+#   OR
+#   /usr/share/grafana/bin/grafana-server
+#   OR
+#   /usr/sbin/grafana-server
+ExecStart={{ grafana_exec }} \
+  --homepath=/usr/share/grafana \
+  --config=${CONF_FILE} \
+  --pidfile=${PID_FILE_DIR}/grafana-server.pid \
+  --packaging=rpm \
+  cfg:default.paths.data=${DATA_DIR} \
+  cfg:default.paths.logs=${LOG_DIR} \
+  cfg:default.paths.plugins=${PLUGINS_DIR} \
+  cfg:default.paths.provisioning=${PROVISIONING_DIR}
+
+LimitNOFILE=65536
+TimeoutStopSec=20
+
+CapabilityBoundingSet=
+DeviceAllow=
+LockPersonality=true
+MemoryDenyWriteExecute=false
+NoNewPrivileges=true
+PrivateDevices=true
+PrivateTmp=true
+ProtectClock=true
+ProtectControlGroups=true
+ProtectHome=true
+ProtectHostname=true
+ProtectKernelLogs=true
+ProtectKernelModules=true
+ProtectKernelTunables=true
+ProtectProc=invisible
+ProtectSystem=full
+RemoveIPC=true
+RestrictAddressFamilies=AF_INET AF_INET6 AF_UNIX
+RestrictNamespaces=true
+RestrictRealtime=true
+RestrictSUIDSGID=true
+SystemCallArchitectures=native
+UMask=0027
+
+[Install]
+WantedBy=multi-user.target

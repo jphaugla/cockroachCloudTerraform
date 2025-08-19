@@ -15,8 +15,14 @@ if [ -z "$1" ]; then
 else
   echo "The username to delete is set to: $1"
 fi
+if [[ -z "${API_URL}" ]]; then
+    echo "API_URL is unset or empty."
+else
+    echo "API_URL is set and not empty."
+    echo ${API_URL}
+fi
 USER_NAME=$1
 curl --request DELETE \
---url "https://cockroachlabs.cloud/api/v1/clusters/${CLUSTER_ID}/sql-users/${USER_NAME}" \
+--url "https://${API_URL}/api/v1/clusters/${CLUSTER_ID}/sql-users/${USER_NAME}" \
 --header "Authorization: Bearer $COCKROACH_API_TOKEN" \
 --header "Cc-Version: 2024-09-16" 

@@ -1,0 +1,23 @@
+{
+  "name": "byoc-jph-1",
+  "plan": "ADVANCED",
+  "provider": "AWS",
+  "spec": {
+    "customer_cloud_account_details": {
+      "aws": {
+        "arn": "arn:aws:iam::${ACCOUNT_ID}:role/CRLBYOCAdmin"
+      }
+    },
+    "dedicated": {
+      "hardware": {
+        "machine_spec": {
+          "num_virtual_cpus": 4
+        },
+        "storage_gib": 15
+      },
+      "region_nodes": {
+        "us-east-2": 3
+      }
+    }
+  }
+}

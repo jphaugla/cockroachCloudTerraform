@@ -9,7 +9,6 @@ This document outlines the procedure for initiating and managing controlled disr
 ### **Create a Service Account and API Token**
 
 Follow the official CockroachDB documentation to set up a service account and generate an API token:
-NOTE:  to see the cluster from the API, cluster admin is needed on the cluster, or the organization.  If the cluster is in a folder, cluster admin on the folder works as well.
 
 🔗 [Manage Service Accounts — CockroachDB Docs](https://www.cockroachlabs.com/docs/cockroachcloud/managing-access#manage-service-accounts)
 

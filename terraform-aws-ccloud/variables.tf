@@ -108,20 +108,10 @@ variable "run_ansible" {
    default     = true
 }
 
-variable "aws_config" {
-   description = "aws config file"
-   type        = list(string)
-}
-
-variable "aws_credentials" {
-   description = "aws credentials directory"
-   type        = list(string)
-}
-
-
 variable "node_count" {
    description = "the number of nodes"
    type        = number
+   default     = 3
 }
 
 variable "crdb_service_name" {
@@ -197,8 +187,63 @@ variable "crdb_service_name" {
       type        = bool
       default     = false
     }
-variable "cockroach_api_token" {
-  description = "Cockroach Cloud API token (picks up from TF_VAR_cockroach_api_token)"
+    variable "enable_privatelink" {
+      description = "enable privatelink deployment"
+      type        = bool
+      default     = true
+    }
+    variable "cockroach_api_token" {
+      description = "Cockroach Cloud API token (picks up from TF_VAR_cockroach_api_token)"
+      type        = string
+    }
+    # Control whether to create a new cluster (true) or use an existing one (false)
+    variable "create_cluster" {
+      description = "If false, Terraform will not create a CockroachDB Cloud cluster but will import an existing one."
+      type        = bool
+      default     = true
+    }
+    
+    # When create_cluster = false, this must be set to the ID of your existing cluster
+    variable "existing_crdb_cluster_id" {
+      description = "ID of an already‐provisioned CockroachDB Cloud cluster to manage."
+      type        = string
+      default     = ""
+    }
+# when importing, you must supply the cluster cert
+variable "crdb_cluster_cert" {
+  description = "PEM-encoded cluster CA cert (used when create_cluster = false)"
   type        = string
+  default     = ""
 }
 
+# when importing, you must also supply the per-region endpoints
+variable "existing_crdb_private_endpoint_dns_list" {
+  description = "Per-region INTERNAL DNS names (one per region) when create_cluster = false"
+  type        = list(string)
+  default     = []
+}
+
+variable "existing_crdb_public_endpoint_dns_list" {
+  description = "Per-region PUBLIC SQL DNS names (one per region) when create_cluster = false"
+  type        = list(string)
+  default     = []
+}
+
+# ----------------------------------------
+# Kafka Instance Specifications
+# ----------------------------------------
+    variable "include_kafka" {
+      description = "'yes' or 'no' to include an kafka Instance"
+      type        = string
+      default     = "yes"
+      validation {
+        condition = contains(["yes", "no"], var.include_kafka)
+        error_message = "Valid value for variable 'include_kafka' is : 'yes' or 'no'"
+      }
+    }
+
+    variable "kafka_instance_type" {
+      description = "Kafka Instance Type"
+      type        = string
+      default     = "t3a.small"
+    }

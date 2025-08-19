@@ -1,0 +1,81 @@
+groups:
+- name: cockroachdb_cloud_aliases
+  interval: 30s
+  rules:
+    # ---- Exec / SQL ----
+    - record: exec_latency_bucket
+      expr: crdb_dedicated_exec_latency_bucket
+    - record: exec_latency_count
+      expr: crdb_dedicated_exec_latency_count
+    - record: exec_latency_sum
+      expr: crdb_dedicated_exec_latency_sum
+    - record: exec_error_total
+      expr: crdb_dedicated_exec_error_total
+
+    # ---- DistSender ----
+    - record: distsender_rpc_sent_nextreplicaerror_total
+      expr: crdb_dedicated_distsender_rpc_sent_nextreplicaerror_total
+    - record: distsender_rpc_sent_local_total
+      expr: crdb_dedicated_distsender_rpc_sent_local_total
+    - record: distsender_rpc_sent_total
+      expr: crdb_dedicated_distsender_rpc_sent_total
+    - record: distsender_batches_partial_total
+      expr: crdb_dedicated_distsender_batches_partial_total
+    - record: distsender_batches_total
+      expr: crdb_dedicated_distsender_batches_total
+    - record: distsender_errors_notleaseholder_total
+      expr: crdb_dedicated_distsender_errors_notleaseholder_total
+
+    # ---- Clock offsets ----
+    - record: clock_offset_meannanos
+      expr: crdb_dedicated_clock_offset_meannanos
+    - record: clock_offset_stddevnanos
+      expr: crdb_dedicated_clock_offset_stddevnanos
+
+    # ---- Capacity / storage ----
+    - record: capacity_available
+      expr: crdb_dedicated_capacity_available
+    - record: capacity_reserved
+      expr: crdb_dedicated_capacity_reserved
+    - record: capacity_used
+      expr: crdb_dedicated_capacity_used
+    - record: capacity
+      expr: crdb_dedicated_capacity
+
+    # ---- Changefeeds ----
+    - record: changefeed_commit_latency_bucket
+      expr: crdb_dedicated_changefeed_commit_latency_bucket
+    - record: changefeed_commit_latency_count
+      expr: crdb_dedicated_changefeed_commit_latency_count
+    - record: changefeed_commit_latency_sum
+      expr: crdb_dedicated_changefeed_commit_latency_sum
+
+    - record: changefeed_message_size_hist_bucket
+      expr: crdb_dedicated_changefeed_message_size_hist_bucket
+    - record: changefeed_message_size_hist_count
+      expr: crdb_dedicated_changefeed_message_size_hist_count
+    - record: changefeed_message_size_hist_sum
+      expr: crdb_dedicated_changefeed_message_size_hist_sum
+
+    - record: changefeed_emitted_messages_total
+      expr: crdb_dedicated_changefeed_emitted_messages_total
+    - record: changefeed_failures_total
+      expr: crdb_dedicated_changefeed_failures_total
+    - record: changefeed_error_retries_total
+      expr: crdb_dedicated_changefeed_error_retries_total
+    - record: changefeed_backfill_pending_ranges
+      expr: crdb_dedicated_changefeed_backfill_pending_ranges
+    - record: changefeed_backfill_count
+      expr: crdb_dedicated_changefeed_backfill_count
+    - record: changefeed_running
+      expr: crdb_dedicated_changefeed_running
+    - record: changefeed_max_behind_nanos
+      expr: crdb_dedicated_changefeed_max_behind_nanos
+
+    # ---- AddSSTable ----
+    - record: addsstable_applications_total
+      expr: crdb_dedicated_addsstable_applications_total
+    - record: addsstable_copies_total
+      expr: crdb_dedicated_addsstable_copies_total
+    - record: addsstable_proposals_total
+      expr: crdb_dedicated_addsstable_proposals_total

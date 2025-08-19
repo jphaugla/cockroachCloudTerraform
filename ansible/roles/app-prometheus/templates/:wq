@@ -1,0 +1,16 @@
+global:
+  scrape_interval: 10s
+  evaluation_interval: 10s
+
+# Prometheus configuration for CockroachDB Advanced for a single region
+scrape_configs:
+  - job_name: 'cockraochdb'
+    metrics_path: '/api/v1/clusters/{{ cluster_id }}/metricexport/prometheus/{{ region }}/scrape'
+    static_configs:
+      - targets: ['{{ crdb_cloud_url }}']
+        labels:
+          cluster: '{{ cluster_id }}'
+          region: '{{ region }}'
+    scheme: 'https'
+    authorization:
+      credentials: '{{ cockroach_api_token }}'

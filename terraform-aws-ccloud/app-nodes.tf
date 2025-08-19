@@ -27,6 +27,7 @@ module "crdb-region-0" {
   count               = local.region_count > 0 ? 1 : 0
   source              = "../terraform-aws-app"
   enable_private_dns  = var.enable_private_dns
+  enable_privatelink  = var.enable_privatelink
   providers = {
     aws = aws.region0
   }
@@ -35,8 +36,8 @@ module "crdb-region-0" {
   project_name        = var.project_name
 
   # CockroachDB cluster inputs
-  crdb_cluster_id           = cockroach_cluster.advanced.id
-  crdb_cluster_cert         = data.cockroach_cluster_cert.cluster.cert
+  crdb_cluster_id           = local.cluster_id
+  crdb_cluster_cert         = local.crdb_cluster_cert
   crdb_private_endpoint_dns = local.crdb_private_endpoint_dns_list[0]
   crdb_public_endpoint_dns  = local.crdb_public_endpoint_dns_list[0]
   crdb_service_name         = var.crdb_service_name
@@ -44,12 +45,11 @@ module "crdb-region-0" {
   folder_path               = var.folder_path
   run_ansible               = var.run_ansible
   delete_protection         = var.delete_protection
+  cockroach_api_token       = var.cockroach_api_token
 
   # AWS & Networking
   aws_region       = var.aws_region_list[0]
   cidr             = var.vpc_cidr_list[0]
-  aws_config       = var.aws_config
-  aws_credentials  = var.aws_credentials
   netskope_ips     = var.netskope_ips
 
   # EC2 / Application Node
@@ -58,6 +58,10 @@ module "crdb-region-0" {
   instance_key_name  = var.aws_instance_keys[0]
   ssh_private_key    = var.ssh_private_key_list[0]
   my_ip_address      = var.my_ip_address
+
+  # kafka
+  include_kafka        = var.include_kafka
+  kafka_instance_type  = var.kafka_instance_type
 
   # Resource Sizing
   node_count         = var.node_count
@@ -83,6 +87,7 @@ module "crdb-region-1" {
   count               = local.region_count > 1 ? 1 : 0
   source              = "../terraform-aws-app"
   enable_private_dns  = var.enable_private_dns
+  enable_privatelink  = var.enable_privatelink
   providers = {
     aws = aws.region1
   }
@@ -90,8 +95,8 @@ module "crdb-region-1" {
   owner               = var.owner
   project_name        = var.project_name
 
-  crdb_cluster_id           = cockroach_cluster.advanced.id
-  crdb_cluster_cert         = data.cockroach_cluster_cert.cluster.cert
+  crdb_cluster_id           = local.cluster_id
+  crdb_cluster_cert         = local.crdb_cluster_cert
   crdb_private_endpoint_dns = local.crdb_private_endpoint_dns_list[1]
   crdb_public_endpoint_dns  = local.crdb_public_endpoint_dns_list[1]
   crdb_service_name         = var.crdb_service_name
@@ -99,11 +104,10 @@ module "crdb-region-1" {
   folder_path               = var.folder_path
   run_ansible               = var.run_ansible
   delete_protection         = var.delete_protection
+  cockroach_api_token       = var.cockroach_api_token
 
   aws_region       = var.aws_region_list[1]
   cidr             = var.vpc_cidr_list[1]
-  aws_config       = var.aws_config
-  aws_credentials  = var.aws_credentials
   netskope_ips     = var.netskope_ips
 
   include_app        = var.include_app
@@ -111,6 +115,10 @@ module "crdb-region-1" {
   instance_key_name  = var.aws_instance_keys[1]
   ssh_private_key    = var.ssh_private_key_list[1]
   my_ip_address      = var.my_ip_address
+
+  # kafka
+  include_kafka        = var.include_kafka
+  kafka_instance_type  = var.kafka_instance_type
 
   node_count         = var.node_count
   storage_gib        = var.storage_gib
@@ -133,6 +141,7 @@ module "crdb-region-2" {
   count               = local.region_count > 2 ? 1 : 0
   source              = "../terraform-aws-app"
   enable_private_dns  = var.enable_private_dns
+  enable_privatelink  = var.enable_privatelink
   providers = {
     aws = aws.region2
   }
@@ -140,8 +149,8 @@ module "crdb-region-2" {
   owner               = var.owner
   project_name        = var.project_name
 
-  crdb_cluster_id           = cockroach_cluster.advanced.id
-  crdb_cluster_cert         = data.cockroach_cluster_cert.cluster.cert
+  crdb_cluster_id           = local.cluster_id
+  crdb_cluster_cert         = local.crdb_cluster_cert
   crdb_private_endpoint_dns = local.crdb_private_endpoint_dns_list[2]
   crdb_public_endpoint_dns  = local.crdb_public_endpoint_dns_list[2]
   crdb_service_name         = var.crdb_service_name
@@ -149,11 +158,10 @@ module "crdb-region-2" {
   folder_path               = var.folder_path
   run_ansible               = var.run_ansible
   delete_protection         = var.delete_protection
+  cockroach_api_token       = var.cockroach_api_token
 
   aws_region       = var.aws_region_list[2]
   cidr             = var.vpc_cidr_list[2]
-  aws_config       = var.aws_config
-  aws_credentials  = var.aws_credentials
   netskope_ips     = var.netskope_ips
 
   include_app        = var.include_app
@@ -161,6 +169,10 @@ module "crdb-region-2" {
   instance_key_name  = var.aws_instance_keys[2]
   ssh_private_key    = var.ssh_private_key_list[2]
   my_ip_address      = var.my_ip_address
+
+  # kafka
+  include_kafka        = var.include_kafka
+  kafka_instance_type  = var.kafka_instance_type
 
   node_count         = var.node_count
   storage_gib        = var.storage_gib

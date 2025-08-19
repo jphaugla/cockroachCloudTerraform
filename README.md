@@ -165,6 +165,19 @@ export DATABASE_URL="postgresql://<user>:<pass>@$(terraform output -raw crdb_sql
 cockroach sql --url="$DATABASE_URL"
 ```
 
+## Using the API
+A [set of scripts](api) is included for interacting with the Cockroach Cloud API.
+* [This is the CockroachDB Cloud API documentation](https://www.cockroachlabs.com/docs/api/cloud/v1.html#overview)
+* The following environment variables need to be set up to use the API scripts:
+```bash
+export COCKROACH_API_TOKEN=CCDB1_QRblahdlNKaDblahmzxyV3_1EmWcSblahrN1i7xi9SzNEblahcoc0gPrx0blahd
+export API_URL=cockroach.cloud
+export ACCOUNT_ID=986753099999
+# add the cluster id after retrieving it with api/clusters.sh
+export CLUSTER_ID=7bef2blah528f-4blahb15f-bblah26b961d
+# only needed on a few scripts
+export SA_ID=4f955377-blah-400b-blah-blah146fblah
+``` 
 ## Cleanup
 Before destroy, drop the sql  user name that is created (example is jhaugland).  Without dropping the user, the destroy cluster will fail.
 

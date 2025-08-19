@@ -8,17 +8,22 @@ if [[ -z "${COCKROACH_API_TOKEN}" ]]; then
     echo "COCKROACH_API_TOKEN is unset or empty."
 else
     echo "COCKROACH_API_TOKEN is set and not empty."
+    echo ${COCKROACH_API_TOKEN}
+fi
+if [[ -z "${API_URL}" ]]; then
+    echo "API_URL is unset or empty."
+else
+    echo "API_URL is set and not empty."
+    echo ${API_URL}
 fi
 curl --request PATCH \
-  --url https://cockroachlabs.cloud/api/v1/clusters/${CLUSTER_ID} \
-  --header 'Authorization: Bearer ${COCKROACH_API_TOKEN}' \
-  --header 'Cc-Version: 2024-09-16' \
+  --url "https://${API_URL}/api/v1/clusters/${CLUSTER_ID}" \
+  --header "Authorization: Bearer ${COCKROACH_API_TOKEN}" \
+  --header "Cc-Version: 2024-09-16" \
   --json '{
-    "spec": {
       "dedicated": {
         "region_nodes": {
-          "us-west-2": 4
+          "us-east-2": 3
         }
       }
-    }
   }'

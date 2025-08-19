@@ -104,4 +104,52 @@ resource "aws_iam_instance_profile" "ec2_instance_profile" {
   name = "${var.owner}-${var.project_name}-${var.aws_region}-instance-profile"
   role = aws_iam_role.ec2_s3_role.name
 }
+# Role that CRDB will assume to write to your bucket
+resource "aws_iam_role" "crdb_changefeed_role" {
+  name = "${var.owner}-${var.project_name}-${var.aws_region}-crdb-changefeed-role"
+
+  assume_role_policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [{
+      Effect    = "Allow",
+      Action    = "sts:AssumeRole",
+      Principal = {
+        AWS = "arn:aws:iam::028856232579:role/crdb-wi-b923326b961d-us-east-2"
+      }
+    }]
+  })
+}
+
+# Policy granting write to your bucket/prefix
+resource "aws_iam_policy" "crdb_changefeed_s3" {
+  name = "${var.owner}-${var.project_name}-${var.aws_region}-crdb-changefeed-s3"
+
+  policy = jsonencode({
+    Version = "2012-10-17",
+    Statement = [
+      {
+        Sid    = "ListBucket",
+        Effect = "Allow",
+        Action = ["s3:ListBucket", "s3:ListBucketMultipartUploads"],
+        Resource = aws_s3_bucket.molt_bucket.arn
+      },
+      {
+        Sid    = "PutObjects",
+        Effect = "Allow",
+        Action = [
+          "s3:PutObject",
+          "s3:AbortMultipartUpload",
+          "s3:PutObjectTagging"
+        ],
+        Resource = "${aws_s3_bucket.molt_bucket.arn}/*"
+      }
+      # If bucket uses SSE-KMS, also add kms:Encrypt/GenerateDataKey on the CMK
+    ]
+  })
+}
+
+resource "aws_iam_role_policy_attachment" "crdb_changefeed_attach" {
+  role       = aws_iam_role.crdb_changefeed_role.name
+  policy_arn = aws_iam_policy.crdb_changefeed_s3.arn
+}
 

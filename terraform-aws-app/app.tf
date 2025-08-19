@@ -32,24 +32,6 @@ resource "aws_instance" "app" {
   }
 }
 
-# aws ec2 describe-images --region us-east-2 --filters "Name=name, Values=al2023-ami-2023*"
-data "aws_ami" "amazon_linux_2023_x64" {
- most_recent = true
- owners = ["amazon"]
- filter {
-   name   = "name"
-   values = ["al2023-ami-2023*"]
- }
- filter {
-      name = "architecture"
-      values = [ "x86_64" ]
-  }
-  filter {
-      name = "virtualization-type"
-      values = [ "hvm" ]
-  }
-}
-
 resource "local_file" "cluster_cert" {
   filename = "${var.playbook_working_directory}/temp/${var.aws_region}/tls_cert"
   content  = var.crdb_cluster_cert

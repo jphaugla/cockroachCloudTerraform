@@ -1,36 +1,26 @@
 # outputs.tf
 
 output "cluster_id" {
-  description = "The ID of the CockroachDB cluster"
-  value       = cockroach_cluster.advanced.id
+  description = "The ID of the CockroachDB cluster (created or existing)"
+  value       = local.cluster_id
 }
 
 output "sql_endpoint" {
-  description = "SQL endpoint (host:port) for the cluster"
-  value       = "${cockroach_cluster.advanced.regions[0].sql_dns}:26257"
+  description = "SQL endpoint (host:port) for region 0"
+  value       = length(local.crdb_public_endpoint_dns_list) > 0 ? "${local.crdb_public_endpoint_dns_list[0]}:26257" : ""
 }
 
 output "admin_ui_endpoint" {
-  description = "Admin UI DNS endpoint for the cluster"
-  value       = cockroach_cluster.advanced.regions[0].ui_dns
+  description = "Admin UI DNS endpoint for region 0 (when importing and UI DNS is unknown, this mirrors public SQL DNS)"
+  value       = length(local.crdb_public_endpoint_dns_list) > 0 ? local.crdb_public_endpoint_dns_list[0] : ""
 }
 
 output "crdb_private_endpoint_dns" {
-  description = "internal dns connection string"
-  value = cockroach_cluster.advanced.regions[0].internal_dns
+  description = "Internal DNS connection string for region 0"
+  value       = length(local.crdb_private_endpoint_dns_list) > 0 ? local.crdb_private_endpoint_dns_list[0] : ""
 }
 
 output "crdb_public_endpoint_dns" {
-  description = "public dns connection string"
-  value = cockroach_cluster.advanced.regions[0].sql_dns
+  description = "Public SQL DNS connection string for region 0"
+  value       = length(local.crdb_public_endpoint_dns_list) > 0 ? local.crdb_public_endpoint_dns_list[0] : ""
 }
-
-# — OR — if you prefer using a data source:
- data "cockroach_cluster" "advanced_fetch" {
-   id = cockroach_cluster.advanced.id
-}
-
-# output "crdb_private_endpoint_dns" {
-#   value = data.cockroach_cluster.advanced_fetch.sql_dns
-# }
-

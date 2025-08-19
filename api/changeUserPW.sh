@@ -1,4 +1,5 @@
-# create a user name of alfred with the password from the newpassword.json file
+# change user password
+USER_NAME=jhaugland
 if [[ -z "${CLUSTER_ID}" ]]; then
     echo "CLUSTER_ID is unset or empty."
 else
@@ -9,9 +10,14 @@ if [[ -z "${COCKROACH_API_TOKEN}" ]]; then
 else
     echo "COCKROACH_API_TOKEN is set and not empty."
 fi
-USER_NAME=alfred
-curl --request POST \
---url "https://cockroachlabs.cloud/api/v1/clusters/${CLUSTER_ID}/sql-users/${USER_NAME}/password" \
+if [[ -z "${API_URL}" ]]; then
+    echo "API_URL is unset or empty."
+else
+    echo "API_URL is set and not empty."
+    echo ${API_URL}
+fi
+curl --request PUT \
+--url "https://${API_URL}/api/v1/clusters/${CLUSTER_ID}/sql-users/${USER_NAME}/password" \
 --header "Authorization: Bearer ${COCKROACH_API_TOKEN}" \
 --header "Cc-Version: 2024-09-16" \
 --json @newpassword.json

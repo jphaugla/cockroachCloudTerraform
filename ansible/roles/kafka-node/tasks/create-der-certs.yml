@@ -1,0 +1,21 @@
+- name: create ca.crt.der
+  become: yes
+  shell: |
+    # remove any leftover stale file
+    rm -f ca.crt.der
+    # convert PEM to DER
+    openssl x509 -outform der -in ca.crt -out ca.crt.der
+  args:
+    chdir: "/home/{{ kafka_username }}/certs"
+
+- name: set strict permissions on cert files
+  become: yes
+  file:
+    path: "/home/{{ kafka_username }}/certs/{{ item }}"
+    owner: "{{ kafka_username }}"
+    group: "{{ kafka_username }}"
+    mode: '0400'
+  loop:
+    - ca.crt
+    - ca.crt.der
+

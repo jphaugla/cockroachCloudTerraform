@@ -79,3 +79,14 @@ resource "aws_network_interface" "app" {
   ]
   tags = local.tags
 }
+
+resource "aws_network_interface" "kafka" {
+  count           = 1
+  subnet_id       = aws_subnet.public_subnets[0].id
+  security_groups = [
+    module.security_group_intra.security_group_id,
+    module.sg_kafka.security_group_id,
+    module.sg_management.security_group_id,
+  ]
+  tags = local.tags
+}

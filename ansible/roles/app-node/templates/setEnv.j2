@@ -4,3 +4,5 @@ export COCKROACH_DB_USER={{ db_admin_user }}
 export COCKROACH_DB_PASS={{ db_admin_password }}
 export REGION={{region}}
 export COCKROACH_URL="jdbc:postgresql://${COCKROACH_HOST}:${COCKROACH_PORT}/defaultdb?sslmode=verify-full&sslrootcert=$HOME/certs/ca.crt&user=${COCKROACH_DB_USER}&password=${COCKROACH_DB_PASS}"
+export KAFKA_HOST={{kafka_internal_ip}}
+export KAFKA_PORT=9092

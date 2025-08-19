@@ -7,6 +7,8 @@ resource "local_file" "instances_file" {
             app_private_ips = "${join("\n", aws_instance.app[*].private_ip)}"
             app_public_ips = "${join("\n", aws_instance.app[*].public_ip)}"
             app_public_ips_un = "${join("\n", [for ip in aws_instance.app.*.public_ip: "${ip} ansible_user=${local.admin_username}"])}"
+            kafka_public_ip = length(aws_instance.kafka) > 0 ? "${aws_instance.kafka.0.public_ip}" : "null"
+            kafka_private_ip = length(aws_instance.kafka) > 0 ? "${aws_instance.kafka.0.private_ip}" : "null"
             ssh_user = "${local.admin_username}"
             all_public_ips_un = "${join("\n", flatten([
               [for ip in aws_instance.app.*.public_ip: "${ip} ansible_user=${local.admin_username}"]
