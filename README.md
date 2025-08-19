@@ -171,7 +171,7 @@ A [set of scripts](api) is included for interacting with the Cockroach Cloud API
 * The following environment variables need to be set up to use the API scripts:
 ```bash
 export COCKROACH_API_TOKEN=CCDB1_QRblahdlNKaDblahmzxyV3_1EmWcSblahrN1i7xi9SzNEblahcoc0gPrx0blahd
-export API_URL=cockroach.cloud
+export API_URL=cockroachlabs.cloud
 export ACCOUNT_ID=986753099999
 # add the cluster id after retrieving it with api/clusters.sh
 export CLUSTER_ID=7bef2blah528f-4blahb15f-bblah26b961d
