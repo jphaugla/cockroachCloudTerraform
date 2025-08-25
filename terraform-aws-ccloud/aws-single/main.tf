@@ -1,7 +1,7 @@
 # terraform.tfvars.example
 module "my_aws" {
 
-enable_private_dns = true
+enable_private_dns = false
 
 # the owner and cluster_postfix will be joined to make the cluster name
 owner                = "jphaugla"

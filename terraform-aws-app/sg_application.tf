@@ -37,6 +37,13 @@ module "sg_application" {
       protocol                 = "tcp"
       source_security_group_id = module.sg_application.security_group_id
       description              = "Allow CRDB SQL (26257) from app hosts"
+    },
+    {
+      from_port                = 26257
+      to_port                  = 26257
+      protocol                 = "tcp"
+      source_security_group_id = module.sg_kafka.security_group_id
+      description              = "Allow CRDB SQL (26257) from Kafka/Connect hosts"
     }
   ]
 
