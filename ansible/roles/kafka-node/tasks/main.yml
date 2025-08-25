@@ -19,6 +19,11 @@
   when:
     - install_cockroach_sql|bool
 
+- name: add certificates
+  include_tasks: add-certs.yml
+  when:
+    - add_certs|bool
+
 - name: Debug OS information
   become: yes
   debug:

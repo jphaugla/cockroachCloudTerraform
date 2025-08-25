@@ -279,3 +279,9 @@ variable "crdb_service_name" {
       type        = string
       default     = "management-staging.crdb.io"
     }
+
+    variable "create_iam_resources" {
+      type        = bool
+      description = "Whether to create IAM role and instance profile for EC2"
+      default     = false
+    }

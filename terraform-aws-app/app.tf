@@ -10,13 +10,12 @@ resource "aws_instance" "app" {
     local.tags,
     { Name = "${var.owner}-crdb-app" }
   )
-  # attach the instance profile you created
-  iam_instance_profile = aws_iam_instance_profile.ec2_instance_profile.name
+  # attach the instance profile only if we created it
+  iam_instance_profile = var.create_iam_resources && length(aws_iam_instance_profile.ec2_instance_profile) > 0 ? aws_iam_instance_profile.ec2_instance_profile[0].name : null
 
-  network_interface {
+  primary_network_interface {
     # will resolve to aws_network_interface.app[0].id when count = 1
     network_interface_id = aws_network_interface.app[count.index].id
-    device_index         = 0
   }
 
   root_block_device {

@@ -6,9 +6,8 @@ resource "aws_instance" "kafka" {
   ami           = "${data.aws_ami.ubuntu_22_04_gen2.id}"
   instance_type = var.kafka_instance_type
   key_name      = var.instance_key_name
-  network_interface {
+  primary_network_interface {
     network_interface_id = aws_network_interface.kafka[count.index].id
-    device_index = 0
   }
   root_block_device {
     delete_on_termination = true
