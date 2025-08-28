@@ -147,7 +147,8 @@ NOTE:  When this terraform apply is complete, there is a cockroach cloud instanc
    terraform apply -auto-approve 
    ```
 NOTE:  When this terraform apply is complete, there is a application server, kafka server and a network
-### Use CLI scripts provided in [azure_private_link subdirectory](azure_private_link) or follow [documented steps to create a privatelink and DNS in your azure account](https://www.cockroachlabs.com/docs/cockroachcloud/connect-to-an-advanced-cluster#azure-private-link).  
+### Create Azure Privatelink and DNS 
+* Use CLI scripts provided in [azure_private_link subdirectory](azure_private_link) or follow [documented steps to create a privatelink and DNS in your azure account](https://www.cockroachlabs.com/docs/cockroachcloud/connect-to-an-advanced-cluster#azure-private-link).  
    * To use the [azure_private_link subdirectory](azure_private_link) steps:
      * Adjust environment variables in the [setEnv.sh](setEnv.sh).  Crucial to enter the correct paramaters that match the network and the values from the current environment using [getClusters.sh](api/getClusters.sh).
    ```bash
