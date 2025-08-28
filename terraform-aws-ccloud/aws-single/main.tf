@@ -1,7 +1,7 @@
 # terraform.tfvars.example
 module "my_aws" {
 
-enable_private_dns = false
+enable_private_dns = true
 
 # the owner and cluster_postfix will be joined to make the cluster name
 owner                = "jphaugla"
@@ -26,7 +26,7 @@ my_ip_address        = "162.222.52.234"
 # The following was created to account for NetSkope Tunneling
 # ----------------------------------------
 netskope_ips = ["8.36.116.0/24" ,"8.39.144.0/24", "31.186.239.0/24", "163.116.128.0/17", "162.10.0.0/17"]
-crdb_version = "25.2.4"
+crdb_version = "25.3.0"
 cockroach_api_token = var.cockroach_api_token
 # kafka
 include_kafka = "yes"

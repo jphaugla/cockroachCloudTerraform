@@ -1,2 +1,19 @@
+#!/usr/bin/env bash
+set -euo pipefail
 export CONNECT='postgresql://{{ db_admin_user }}:{{ db_admin_password }}@{{load_balancer_private_ip}}:26257?sslmode=verify-full&sslrootcert=/home/{{ login_username }}/certs/ca.crt'
-cockroach sql --url=${CONNECT} --file=create_postgres_user.sql
+
+# Prefer the discovered path from Ansible; fall back to PATH lookup.
+COCKROACH_BIN="{{ cockroach_path | default('') }}"
+if [[ -z "$COCKROACH_BIN" || ! -x "$COCKROACH_BIN" ]]; then
+  COCKROACH_BIN="$(command -v cockroach || true)"
+fi
+
+if [[ -z "$COCKROACH_BIN" || ! -x "$COCKROACH_BIN" ]]; then
+  echo "cockroach binary not found on PATH and not provided. Aborting." >&2
+  exit 127
+fi
+
+# Ensure a sane PATH for non-interactive shells
+export PATH="/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin:$PATH"
+
+"$COCKROACH_BIN" sql --url=${CONNECT} --file=create_postgres_user.sql

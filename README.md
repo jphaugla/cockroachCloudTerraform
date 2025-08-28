@@ -16,7 +16,7 @@ This repository contains Terraform/Ansible configurations to provision and manag
 - **Azure**
     - **terraform-azure-app**:  terraform for azure application node
         - The terraform files in **terraform-azure-app** create the networking for an application node 
-        - In azure, private link definitions need to be done in the Azure UI as terraform doesn't work
+        - In azure, private link definitions need to be done in the Azure UI or CLI  as terraform doesn't work
     - **terraform-azure-ccloud**:  terraform for cockroach cloud azure
         - The terraform files in **terraform-azure-ccloud** define the cockroach cloud cluster 
         - In azure, initiating the application server for each of the defined regions is a separate deployment
@@ -61,7 +61,8 @@ NOTES:
 2. **set enable_private_dns to false**
 - edit main.tf to set enable_private_dns = false
 - set all the other parameters for the deployment in main.tf
-- ensure the COCKROACH_API_TOKEN environment variables are set
+- ensure the COCKROACH_API_TOKEN and TF_VAR_cockroach_api_token environment variables are set
+- ensure aws project information is set up 
 
 3. **Initialize Terraform**
    ```bash
@@ -78,7 +79,7 @@ Click on the actions dots and select "Finish setup"
 6. **set enable_private_dns to true**
 edit main.tf to set enable_private_dns = true
 
-7. **repeat step 3 and 4**
+7. **repeat step 3**
 
 ### Obtain PrivateLink DNS
 
@@ -102,9 +103,10 @@ cockroach sql --url="$DATABASE_URL"
 ## Quick Start for Azure
 NOTES:
 - Unlike AWS, the cluster creation and the application server creation are two completely separate terraform processes
-- Azure terraform doesn't effectively handle the private link steps so these steps need to be done manually
+- Azure terraform doesn't effectively handle the private link steps so these steps need to be done manually in the azure UI or the azure CLI
 - Outputs from the cluster creation terraform are used for the application deployment
 - the control file for the cluster is terraform-azure-ccloud/cluster-only/main.tf
+  * this only creates the cockroach cloud cluster and does not create application server or the network for the application server.
 - the control file for the application side is terraform-azure-app/app-only/main.tf
 
 1. **change to correct directory**
@@ -114,7 +116,6 @@ NOTES:
 2. **set enable_private_dns to false**
    - edit main.tf to set specific values for the deployment
    - ensure the COCKROACH_API_TOKEN environment variables are set
-
 3. **Initialize Terraform**
    ```bash
    terraform init
@@ -123,24 +124,46 @@ NOTES:
    ```bash
    terraform apply -auto-approve 
    ```
-5. **accept the connection in cockroach cloud network**
+NOTE:  When this terraform apply is complete, there is a cockroach cloud instance that can be observerd in cockroach cloud
+5. **create the privatelink network connection in cockroach cloud UI**
    In the cockroach cloud UI go to the Networking->Private endpoint page
-   Click on the actions dots and select "Finish setup"
-6. Follow documented steps to create a private link in cockroach cloud and create DNS
-7. **change to correct directory**
+   Click *Add a private endpoint* and follow directions to copy this Resource ID as it will be needed to define the private endpoint and dns in azure
+6. Kick off terraform to create the network and application servers to interact with cockroach cloud cluster
+   * *change to correct directory and adjust main.tf**
+   * adjust main.tf for your environment such as your ip address, CIDR, crdb_version, ssh_key_name (must be pre-created)
+   * important:  **set enable_private_dns to false**
    ```bash
    cd terraform-azure-app/app-only
    ```
-8.  **set enable_private_dns to false**
-    - edit main.tf to set specific values for the deployment
-    - ensure the COCKROACH_API_TOKEN environment variable is set
-    - ensure the PE_Service ID environment variable is set
-    - ensure crdb_private_endpoint_dns environment variable is set
-9. **Initialize Terraform**
+   * *Initialize Terraform*
    ```bash
    terraform init
    ```
-10. **Apply**
+   * *Apply*
+   ```bash
+   terraform apply -auto-approve 
+   ```
+NOTE:  When this terraform apply is complete, there is a application server, kafka server and a network
+7. Use CLI scripts provided in ![azure_private_link subdirectory](azure_private_link) or follow [documented steps to create a privatelink and DNS in your azure account](https://www.cockroachlabs.com/docs/cockroachcloud/connect-to-an-advanced-cluster#azure-private-link).  
+   * To use the [azure_private_link subdirectory](azure_private_link) steps:
+     * Adjust environment variables in the [setEnv.sh](setEnv.sh).  Crucial to enter the correct paramaters that match the network and the values from the current environment using [getClusters.sh](api/getClusters.sh).
+   ```bash
+   cd azure_private_link
+   source setEnv.sh
+   ./createEndpoint.sh
+   ./dns_setup.sh
+   ./addArecord.sh
+   ```
+8. Run the ansible to install application server, kafka, and prometheus with connectivity to cockroach cloud cluster
+    * edit main.tf to set specific values for the deployment
+    * ensure the COCKROACH_API_TOKEN environment variable is set
+    * important:  **set enable_private_dns to true**
+    * ensure crdb_private_endpoint_dns environment variable is set
+    * *Initialize Terraform*
+   ```bash
+   terraform init
+   ```
+    * *Apply*
    ```bash
    terraform apply -auto-approve 
    ```

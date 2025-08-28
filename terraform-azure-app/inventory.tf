@@ -8,6 +8,8 @@ resource "local_file" "instances_file" {
             app_public_ips = "${join("\n", azurerm_linux_virtual_machine.app[*].public_ip_address)}"
             all_private_ips = "${join("\n", azurerm_linux_virtual_machine.app[*].private_ip_address)}"
             all_public_ips = "${join("\n", azurerm_linux_virtual_machine.app[*].public_ip_address)}"
+            kafka_public_ip = length(azurerm_linux_virtual_machine.kafka) > 0 ? "${azurerm_linux_virtual_machine.kafka.0.public_ip_address}" : "null"
+            kafka_private_ip = length(azurerm_linux_virtual_machine.kafka) > 0 ? "${azurerm_linux_virtual_machine.kafka.0.private_ip_address}" : "null"
             ssh_user = "${var.login_username}"
         })
 

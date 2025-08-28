@@ -28,14 +28,20 @@ ansible-playbook \
   -e "load_balancer_private_ip=${var.crdb_private_endpoint_dns}" \
   -e "crdb_version=${var.crdb_version}" \
   -e "crdb_file_location=${var.crdb_file_location}" \
+  -e include_kafka=${var.include_kafka} \
+  -e kafka_internal_ip=${local.kafka_private_ip} \
+  -e kafka_username=adminuser \
+  -e "setup_migration=${var.setup_migration}" \
   -e "login_username=${var.login_username}" \
   -e "include_app=${var.include_app}" \
   -e "resource_group=${local.resource_group_name}" \
   -e "vnet_name=${azurerm_virtual_network.vm01.name}" \
+  -e "cockroach_api_token=${var.cockroach_api_token}" \
   -e "subnet_name=${azurerm_subnet.private[0].name}" \
   -e "cluster_id=${var.crdb_cluster_id}" \
   -e "owner=${var.owner}" \
-  -e "pe_service_id=${var.pe_service_id}"
+  -e "crdb_cloud_url=${var.crdb_cloud_url}" \
+  -e "bucket_name=${local.bucket_name}" 
 EOT
   }
 

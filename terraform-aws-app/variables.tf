@@ -277,7 +277,7 @@ variable "crdb_service_name" {
     variable "crdb_cloud_url" {
       description = "Cockroach Cloud API url"
       type        = string
-      default     = "management-staging.crdb.io"
+      default     = "cockroachlabs.cloud"
     }
 
     variable "create_iam_resources" {

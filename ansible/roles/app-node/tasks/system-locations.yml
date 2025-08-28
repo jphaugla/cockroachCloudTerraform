@@ -25,6 +25,12 @@
   when:
     - is_amazon_linux|bool
 
+- name: Discover cockroach binary path
+  shell: command -v cockroach || echo /usr/local/bin/cockroach
+  register: cockroach_bin
+  changed_when: false
+  check_mode: no
+
 - name: copy system_locations script
   ansible.builtin.template:
     src: system_locations.j2
@@ -32,8 +38,12 @@
     owner: "{{ login_username }}"
     group: "{{ login_username }}"
     mode: '0755'
+  vars:
+    cockroach_path: "{{ cockroach_bin.stdout | trim }}"
 
 - name: run system_locations to install locations
   ansible.builtin.command: bash ./system_locations.sh
   args:
     chdir: /home/{{ login_username }}
+  environment:
+    PATH: "/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin"

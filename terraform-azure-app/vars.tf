@@ -306,7 +306,7 @@
       }
     }
 
-    variable "kafka_vm_size" {
+    variable "kafka_instance_type" {
       description = "The Azure instance type for the crdb instances Kafka"
       type        = string
       default     = "t3a.small"
@@ -463,22 +463,22 @@
     }
 
 # NOTE that you can't change this without changing parts of the provisioning scripts.
-variable "test-publisher" {
+variable "test_publisher" {
   description = "The owner of the image"
-  default     = "RedHat"
+  default     = "Canonical"
 }
 
-variable "test-offer" {
+variable "test_offer" {
   description = "The type of the image"
-  default     = "RHEL"
+  default     = "0001-com-ubuntu-server-jammy"
 }
 
-variable "test-sku" {
+variable "test_sku" {
   description = "The SKU of the image"
-  default     = "8-lvm-gen2"
+  default     = "22_04-lts-gen2"
 }
 
-variable "test-version" {
+variable "test_version" {
   description = "The version of the image"
   default     = "latest"
 }
@@ -543,12 +543,19 @@ variable "sql_user_password" {
   type        = string
 }
 
-variable "pe_service_id" {
-  description = "Cockroach Cloud prepivate endpoint resource id from the cockroach cloud UI"
-  type        = string
-}
 variable "run_ansible" {
    description = "run the ansible"
    type        = bool
    default     = true
+}
+
+variable "crdb_cloud_url" {
+  description = "Cockroach Cloud API url"
+  type        = string
+  default     = "cockroachlabs.cloud"
+}
+
+variable "cockroach_api_token" {
+  description = "Cockroach Cloud API token (picks up from TF_VAR_cockroach_api_token)"
+  type        = string
 }
