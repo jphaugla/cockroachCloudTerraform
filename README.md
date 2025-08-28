@@ -48,15 +48,18 @@ export COCKROACH_API_TOKEN=CCDB1_BLAHkjC2MBLAHXGZ6SyyYc_BLAHULj7mwmBLAHz3I84svqd
 export TF_VAR_cockroach_api_token="${COCKROACH_API_TOKEN}"
 ```
 
-## Quick Start for AWS
+## Quick Start for AWS single or multi-region.  
 NOTES: 
 - the control file for this is  terraform-aws-ccloud/aws-multi/main.tf 
        because of the private links in the terraform, an extra apply is needed
-- eventually, will add a single region folder  terraform-aws-ccloud/aws-single/main.tf 
+- directions are same for terraform-aws-ccloud/aws-single/main.tf 
+- there is also terraform-aws-ccloud/aws-defined/main.tf for using an existing cluster and just adding the connected kafka and application nodes but this is not fully tested yet
 
 1. **change to correct directory**
    ```bash
    cd terraform-aws-ccloud/aws-multi
+       or
+   cd terraform-aws-ccloud/aws-single
    ```
 2. **set enable_private_dns to false**
 - edit main.tf to set enable_private_dns = false
@@ -109,26 +112,26 @@ NOTES:
   * this only creates the cockroach cloud cluster and does not create application server or the network for the application server.
 - the control file for the application side is terraform-azure-app/app-only/main.tf
 
-1. **change to correct directory**
+### change to correct directory
    ```bash
    cd terraform-azure-ccloud/cluster-only
    ```
-2. **set enable_private_dns to false**
+### set enable_private_dns to false
    - edit main.tf to set specific values for the deployment
    - ensure the COCKROACH_API_TOKEN environment variables are set
-3. **Initialize Terraform**
+### Initialize Terraform
    ```bash
    terraform init
    ```
-4. **Apply**
+### Apply
    ```bash
    terraform apply -auto-approve 
    ```
-NOTE:  When this terraform apply is complete, there is a cockroach cloud instance that can be observerd in cockroach cloud
-5. **create the privatelink network connection in cockroach cloud UI**
+NOTE:  When this terraform apply is complete, there is a cockroach cloud instance that can be observed in cockroach cloud
+### create the privatelink network connection in cockroach cloud UI
    In the cockroach cloud UI go to the Networking->Private endpoint page
    Click *Add a private endpoint* and follow directions to copy this Resource ID as it will be needed to define the private endpoint and dns in azure
-6. Kick off terraform to create the network and application servers to interact with cockroach cloud cluster
+### Kick off terraform to create the network and application servers to interact with cockroach cloud cluster
    * *change to correct directory and adjust main.tf**
    * adjust main.tf for your environment such as your ip address, CIDR, crdb_version, ssh_key_name (must be pre-created)
    * important:  **set enable_private_dns to false**
@@ -144,7 +147,7 @@ NOTE:  When this terraform apply is complete, there is a cockroach cloud instanc
    terraform apply -auto-approve 
    ```
 NOTE:  When this terraform apply is complete, there is a application server, kafka server and a network
-7. Use CLI scripts provided in ![azure_private_link subdirectory](azure_private_link) or follow [documented steps to create a privatelink and DNS in your azure account](https://www.cockroachlabs.com/docs/cockroachcloud/connect-to-an-advanced-cluster#azure-private-link).  
+### Use CLI scripts provided in [azure_private_link subdirectory](azure_private_link) or follow [documented steps to create a privatelink and DNS in your azure account](https://www.cockroachlabs.com/docs/cockroachcloud/connect-to-an-advanced-cluster#azure-private-link).  
    * To use the [azure_private_link subdirectory](azure_private_link) steps:
      * Adjust environment variables in the [setEnv.sh](setEnv.sh).  Crucial to enter the correct paramaters that match the network and the values from the current environment using [getClusters.sh](api/getClusters.sh).
    ```bash
@@ -154,7 +157,7 @@ NOTE:  When this terraform apply is complete, there is a application server, kaf
    ./dns_setup.sh
    ./addArecord.sh
    ```
-8. Run the ansible to install application server, kafka, and prometheus with connectivity to cockroach cloud cluster
+### Run the ansible to install application server, kafka, and prometheus with connectivity to cockroach cloud cluster
     * edit main.tf to set specific values for the deployment
     * ensure the COCKROACH_API_TOKEN environment variable is set
     * important:  **set enable_private_dns to true**
