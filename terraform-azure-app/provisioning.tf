@@ -41,8 +41,6 @@ ansible-playbook \
   -e "cluster_id=${var.crdb_cluster_id}" \
   -e "owner=${var.owner}" \
   -e "crdb_cloud_url=${var.crdb_cloud_url}" \
-  -e "eventhub_kafka_bootstrap=${module.app_nodes.eventhub_kafka_bootstrap}" \
-  -e "eventhub_connect_admin_connection_string=${module.app_nodes.eventhub_connect_admin_connection_string}" \
   -e "deploy_event_hub=${var.deploy_event_hub}" \
   -e "deploy_azure_sql=${var.deploy_azure_sql}" \
   -e "bucket_name=${local.bucket_name}" 
