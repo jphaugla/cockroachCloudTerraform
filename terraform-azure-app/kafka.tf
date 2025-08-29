@@ -1,3 +1,4 @@
+# kafka.tf
 # Public IP (kept Basic/Dynamic per your snippet; switch to Standard/Static if needed)
 resource "azurerm_public_ip" "kafka-ip" {
   count               = var.include_kafka == "yes" ? 1 : 0

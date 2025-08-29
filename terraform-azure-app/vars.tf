@@ -1,3 +1,4 @@
+# vars.tf
 # ----------------------------------------
 # My IP Address
 # This is used in the creation of the security group 
@@ -558,4 +559,29 @@ variable "crdb_cloud_url" {
 variable "cockroach_api_token" {
   description = "Cockroach Cloud API token (picks up from TF_VAR_cockroach_api_token)"
   type        = string
+}
+
+variable "deploy_azure_sql" {
+  description = "Whether to deploy Azure SQL (Server + DB + Private Endpoint)"
+  type        = bool
+  default     = false
+}
+variable "deploy_event_hub" {
+  description = "Whether to deploy azure event hub"
+  type        = bool
+  default     = false
+}
+# ---- SQL Database (data plane) ----
+# Keep it modest by default; override with TF_VAR_sql_db_sku_name if needed.
+variable "sql_db_sku_name" {
+  description = "Azure SQL DB SKU name (e.g., S0, P1, GP_S_Gen5_2, HS_Gen5_2)"
+  type        = string
+  default     = "S0"
+}
+
+# Name of the hub (aka 'topic' in other systems)
+variable "event_hub_name" {
+  description = "Event Hub name"
+  type        = string
+  default     = "app-events"
 }

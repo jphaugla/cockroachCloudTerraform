@@ -1,3 +1,4 @@
+# network-sg.tf
 resource "azurerm_network_security_group" "desktop_sg" {
     name                = "${var.owner}-${var.resource_name}-sg"
     location            = var.virtual_network_location

@@ -12,7 +12,7 @@ aws_instance_keys    = [ "jph-cockroach-us-east-2-kp01" ]
 vpc_cidr_list        = [ "192.168.5.0/24" ]
 app_instance_type    = "t3.xlarge"
 crdb_service_name    = "jphaugla-api"
-run_ansible          = true
+run_ansible          = false
 node_count           = 3
 storage_gib          = 20
 folder_path          = "/Jphaugla"
@@ -21,7 +21,7 @@ delete_protection    = false
 source               = "../"
 sql_user_name 	     = "jhaugland"
 sql_user_password    = "jasonrocks123456789"
-my_ip_address        = "162.222.52.234"
+my_ip_address        = "162.222.52.25"
 # ----------------------------------------
 # The following was created to account for NetSkope Tunneling
 # ----------------------------------------

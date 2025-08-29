@@ -1,3 +1,4 @@
+# network.tf
 # 1) Your VNet
 resource "azurerm_virtual_network" "vm01" {
   name                = "${var.owner}-${var.resource_name}-network"

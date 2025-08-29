@@ -19,17 +19,16 @@ data "terraform_remote_state" "cluster" {
 
 module "app_nodes" {
   source                           = "../"
-
-  ssh_private_key             = "~/.ssh/jhaugland-eastus2.pem"
-  ssh_key_resource_group = "jhaugland-rg"
-  ssh_key_name                    = "jhaugland-eastus2"
-  virtual_network_cidr                    = "192.168.3.0/24"
-  app_vm_size                    = "Standard_b8ms"
-  haproxy_vm_size                = "Standard_b8ms"
+  ssh_private_key                  = "~/.ssh/jhaugland-eastus2.pem"
+  ssh_key_resource_group           = "jhaugland-rg"
+  ssh_key_name                     = "jhaugland-eastus2"
+  virtual_network_cidr             = "192.168.3.0/24"
+  app_vm_size                      = "Standard_b8ms"
+  haproxy_vm_size                  = "Standard_b8ms"
   app_disk_size                    = 128
-  my_ip_address                    = "67.220.19.36"
+  my_ip_address                    = "162.222.52.25"
   netskope_ips                     = ["8.36.116.0/24", "8.39.144.0/24", "31.186.239.0/24", "163.116.128.0/17", "162.10.0.0/17", "69.120.106.187"]
-  crdb_version = "25.3.0"
+  crdb_version                     = "25.3.0"
 
   # CRDB info from Phase 1
   crdb_cluster_id                  = data.terraform_remote_state.cluster.outputs.crdb_cluster_id
@@ -39,8 +38,7 @@ module "app_nodes" {
   sql_user_password                = data.terraform_remote_state.cluster.outputs.sql_user_password
   virtual_network_location         = data.terraform_remote_state.cluster.outputs.region
   owner                            = data.terraform_remote_state.cluster.outputs.owner
-  resource_name                    =  data.terraform_remote_state.cluster.outputs.project_name
-
+  resource_name                    = data.terraform_remote_state.cluster.outputs.project_name
 
 # Ansible / Inventory
   playbook_working_directory         = "../../ansible"
@@ -50,10 +48,12 @@ module "app_nodes" {
   inventory_template_file            = "templates/inventory.tpl"
   ansible_verbosity_switch           =  "-v"
   # kafka
-  include_kafka = "yes"
-  kafka_instance_type = "Standard_b8ms"
-  cockroach_api_token = var.cockroach_api_token
-  crdb_private_endpoint_dns = "internal-jphaugla-crdb-adv-nqh.azure-eastus2.cockroachlabs.cloud"
-  run_ansible          = true
+  include_kafka                      = "yes"
+  kafka_instance_type                = "Standard_b8ms"
+  cockroach_api_token                = var.cockroach_api_token
+  crdb_private_endpoint_dns          = "internal-jphaugla-crdb-adv-nqh.azure-eastus2.cockroachlabs.cloud"
+  run_ansible                        = false
+  deploy_azure_sql                   = true
+  deploy_event_hub                   = true
 }
 

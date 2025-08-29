@@ -1,3 +1,4 @@
+# app.tf
 # 7) Now, anywhere you need a private‐subnet_id, you can use:
 #     azurerm_subnet.private[0].id   (or [1], [2], ...)
 #    And for a public one:

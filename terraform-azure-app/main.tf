@@ -1,4 +1,4 @@
-
+# main.tf
 # HEY!  I only want to create the resource group in the first region!!
 
 # Create a resource group
