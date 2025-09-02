@@ -24,7 +24,7 @@ curl --request PATCH \
     "dedicated": {
       "hardware": {
         "machine_spec": {
-          "num_virtual_cpus": 4
+          "num_virtual_cpus": 8
         }
       }
     }

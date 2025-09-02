@@ -14,7 +14,6 @@ if [[ -z "${API_URL}" ]]; then
     echo "API_URL is unset or empty."
 else
     echo "API_URL is set and not empty."
-    echo ${API_URL}
 fi
 curl --request PATCH \
   --url "https://${API_URL}/api/v1/clusters/${CLUSTER_ID}" \
@@ -23,7 +22,7 @@ curl --request PATCH \
   --json '{
       "dedicated": {
         "region_nodes": {
-          "us-east-2": 3
+          "westus2": 4
         }
       }
   }'

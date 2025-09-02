@@ -8,7 +8,6 @@ if [[ -z "${COCKROACH_API_TOKEN}" ]]; then
     echo "COCKROACH_API_TOKEN is unset or empty."
 else
     echo "COCKROACH_API_TOKEN is set and not empty."
-    echo ${COCKROACH_API_TOKEN}
 fi
 if [[ -z "${API_URL}" ]]; then
     echo "API_URL is unset or empty."
