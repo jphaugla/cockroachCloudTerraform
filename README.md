@@ -116,7 +116,7 @@ NOTES:
    ```bash
    cd terraform-azure-ccloud/cluster-only
    ```
-### set enable_private_dns to false
+### prepare main.tf
    - edit main.tf to set specific values for the deployment
    - ensure the COCKROACH_API_TOKEN environment variables are set
 ### Initialize Terraform
@@ -132,7 +132,6 @@ NOTE:  When this terraform apply is complete, there is a cockroach cloud instanc
    In the cockroach cloud UI go to the Networking->Private endpoint page
    Click *Add a private endpoint* and follow directions to copy this Resource ID as it will be needed to define the private endpoint and dns in azure
 ### Kick off terraform to create the network and application servers to interact with cockroach cloud cluster
-   * *change to correct directory and adjust main.tf**
    * adjust main.tf for your environment such as your ip address, CIDR, crdb_version, ssh_key_name (must be pre-created)
    * important:  **set enable_private_dns to false**
    ```bash

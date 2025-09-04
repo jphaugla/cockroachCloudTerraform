@@ -11,7 +11,7 @@ module "my_azure" {
   delete_protection    = false
   sql_user_name        = "jhaugland"
   sql_user_password    = "jasonrocks123456789"
-  my_ip_address        = "67.220.19.36"
+  my_ip_address        = "162.222.52.25"
   netskope_ips         = ["8.36.116.0/24", "8.39.144.0/24", "31.186.239.0/24", "163.116.128.0/17", "162.10.0.0/17"]
   cockroach_api_token  = var.cockroach_api_token
 }
