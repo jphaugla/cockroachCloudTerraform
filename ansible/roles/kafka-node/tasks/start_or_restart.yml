@@ -1,0 +1,108 @@
+# Runs once per "svc" from the parent loop
+
+- name: Start {{ svc.name }}
+  ansible.builtin.systemd:
+    name: "{{ svc.name }}"
+    state: started
+    enabled: yes
+  register: _start
+  failed_when: false
+
+# First readiness attempt (HTTP if provided, else TCP)
+- name: Wait for HTTP readiness (first attempt)
+  when: svc.check_url is defined
+  ansible.builtin.uri:
+    url: "{{ svc.check_url }}"
+    status_code: 200
+    validate_certs: false
+  register: _http1
+  retries: 30
+  delay: 3
+  until: _http1.status == 200
+  failed_when: false
+
+- name: Wait for TCP port (first attempt)
+  when: svc.check_url is not defined
+  ansible.builtin.wait_for:
+    host: "{{ kafka_host }}"
+    port: "{{ svc.port }}"
+    state: started
+    timeout: 90
+  register: _tcp1
+  failed_when: false
+
+# Restart on readiness failure
+- name: Restart {{ svc.name }} due to readiness timeout
+  when: >
+    (svc.check_url is defined and (_http1 is failed or _http1.status|default(0) != 200))
+    or
+    (svc.check_url is not defined and (_tcp1 is failed))
+  ansible.builtin.systemd:
+    name: "{{ svc.name }}"
+    state: restarted
+
+# Second readiness attempt (longer)
+- name: Wait for HTTP readiness (second attempt)
+  when: svc.check_url is defined
+  ansible.builtin.uri:
+    url: "{{ svc.check_url }}"
+    status_code: 200
+    validate_certs: false
+  register: _http2
+  retries: 60
+  delay: 3
+  until: _http2.status == 200
+  failed_when: false
+
+- name: Wait for TCP port (second attempt)
+  when: svc.check_url is not defined
+  ansible.builtin.wait_for:
+    host: "{{ kafka_host }}"
+    port: "{{ svc.port }}"
+    state: started
+    timeout: 180
+  register: _tcp2
+  failed_when: false
+
+# Diagnose if still not ready
+- name: Probe loopback binding (127.0.0.1)
+  when: >
+    (svc.check_url is defined and (_http2 is failed or _http2.status|default(0) != 200))
+    or
+    (svc.check_url is not defined and (_tcp2 is failed))
+  ansible.builtin.wait_for:
+    host: "127.0.0.1"
+    port: "{{ svc.port }}"
+    state: started
+    timeout: 3
+  register: _loopback_try
+  failed_when: false
+
+- name: Collect systemd status and logs for the service
+  ansible.builtin.shell: |
+    set -o pipefail
+    echo "===== systemctl status ====="
+    systemctl status {{ svc.name }} --no-pager -l || true
+    echo
+    echo "===== journal (last 200 lines) ====="
+    journalctl -u {{ svc.name }} -n 200 --no-pager || true
+  args:
+    executable: /bin/bash
+  register: _svc_diag
+  changed_when: false         # ← causes “conflicting action statements” error
+  failed_when: false
+
+
+- name: Fail because service  not ready on kafka
+  when: >
+    (svc.check_url is defined and (_http2 is failed or _http2.status|default(0) != 200))
+    or
+    (svc.check_url is not defined and (_tcp2 is failed))
+  ansible.builtin.fail:
+    msg: |
+      {{ svc.name }} is not reachable on {{ kafka_host }}:{{ svc.port }} after restart.
+      Loopback-only bound = {{ (_loopback_try is defined) and (_loopback_try is succeeded) }}.
+      If true, fix listeners to 0.0.0.0 and advertised to {{ kafka_host }}.
+      Diagnostics:
+      {{ _svc_diag.stdout | default('no diagnostics captured') }}
+

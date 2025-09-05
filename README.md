@@ -111,6 +111,7 @@ NOTES:
 - the control file for the cluster is terraform-azure-ccloud/cluster-only/main.tf
   * this only creates the cockroach cloud cluster and does not create application server or the network for the application server.
 - the control file for the application side is terraform-azure-app/app-only/main.tf
+- Azure optionally will also create eventhub and azure sql
 
 ### change to correct directory
    ```bash
@@ -145,15 +146,17 @@ NOTE:  When this terraform apply is complete, there is a cockroach cloud instanc
    ```bash
    terraform apply -auto-approve 
    ```
-NOTE:  When this terraform apply is complete, there is a application server, kafka server and a network
+NOTE:  When this terraform apply is complete, there is a application server, kafka server and a network but nothing is installed
 ### Create Azure Privatelink and DNS 
 * Use CLI scripts provided in [azure_private_link subdirectory](azure_private_link) or follow [documented steps to create a privatelink and DNS in your azure account](https://www.cockroachlabs.com/docs/cockroachcloud/connect-to-an-advanced-cluster#azure-private-link).  
    * To use the [azure_private_link subdirectory](azure_private_link) steps:
      * Adjust environment variables in the [setEnv.sh](setEnv.sh).  Crucial to enter the correct paramaters that match the network and the values from the current environment using [getClusters.sh](api/getClusters.sh).
+       * make sure to put the Resource ID from the *Add a private Endpoint* screen from cockroach cloud in the CRDB_ALIAS environment variable value
    ```bash
    cd azure_private_link
    source setEnv.sh
    ./createEndpoint.sh
+#  the last output line of this script has the resource ID needed for the endpoint.  This value must be placed in the private link defined in the cockroach cloud UI.  Copy this value in, click validate, and complete.
    ./dns_setup.sh
    ./addArecord.sh
    ```
@@ -161,7 +164,7 @@ NOTE:  When this terraform apply is complete, there is a application server, kaf
     * edit main.tf to set specific values for the deployment
     * ensure the COCKROACH_API_TOKEN environment variable is set
     * important:  **set enable_private_dns to true**
-    * ensure crdb_private_endpoint_dns environment variable is set
+    * ensure crdb_private_endpoint_dns environment variable is set for this deployment
     * *Initialize Terraform*
    ```bash
    terraform init

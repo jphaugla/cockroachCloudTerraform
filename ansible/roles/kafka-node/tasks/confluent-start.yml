@@ -1,35 +1,56 @@
-- name: start zookeeper
-  become: yes
-  shell:
-    cmd: systemctl start confluent-zookeeper
+# Pick the IP we should target for readiness checks
+- name: Set target host for checks
+  set_fact:
+    kafka_host: "{{ kafka_internal_ip | default(ansible_default_ipv4.address) }}"
 
-- name: start kafka server
-  become: yes
-  shell:
-    cmd: systemctl start confluent-server
+# Define your services in the order you want them started
+- name: Define services (order matters)
+  set_fact:
+    services:
+      - { name: confluent-zookeeper,       port: 2181 }
+      - { name: confluent-server,          port: 9092 }
+      - { name: confluent-schema-registry, port: 8081, check_url: "http://{{ kafka_host }}:8081/subjects" }
+      - { name: confluent-kafka-connect,   port: 8083, check_url: "http://{{ kafka_host }}:8083/v1/metadata/id" }
+      - { name: confluent-kafka-rest,      port: 8082, check_url: "http://{{ kafka_host }}:8082/topics" }
+      - { name: confluent-ksqldb,          port: 8088, check_url: "http://{{ kafka_host }}:8088/info" }
+      - { name: confluent-control-center,  port: 9021, check_url: "http://{{ kafka_host }}:9021" }
 
-- name: start schema registry
-  become: yes
-  shell:
-    cmd: systemctl start confluent-schema-registry
+# (Optional but recommended) auto-restart on crashes
+- name: Ensure systemd drop-in dirs exist
+  file:
+    path: "/etc/systemd/system/{{ item.name }}.d"
+    state: directory
+    mode: "0755"
+  loop: "{{ services }}"
 
-- name: start kafka connect
-  become: yes
-  shell:
-    cmd: systemctl start confluent-kafka-connect
+- name: Install Restart=on-failure drop-in
+  copy:
+    dest: "/etc/systemd/system/{{ item.name }}.d/restart.conf"
+    content: |
+      [Service]
+      Restart=on-failure
+      RestartSec=5s
+      StartLimitBurst=10
+      StartLimitIntervalSec=0
+  loop: "{{ services }}"
+  register: dropin_copies
 
-- name: start kafka rest
-  become: yes
-  shell:
-    cmd: systemctl start confluent-kafka-rest
+- name: Reload systemd if any drop-in changed
+  ansible.builtin.systemd:
+    daemon_reload: yes
+  when: dropin_copies is changed
 
-- name: start ksqldb
-  become: yes
-  shell:
-    cmd: systemctl start confluent-ksqldb
+# Enable all services to start on boot
+- name: Enable services on boot
+  ansible.builtin.systemd:
+    name: "{{ item.name }}"
+    enabled: yes
+  loop: "{{ services }}"
 
-- name: start control center
-  become: yes
-  shell:
-    cmd: systemctl start confluent-control-center
-
+# 👇 THIS is the include you asked about — it lives here in confluent-start.yml
+- name: Start or restart and wait (per service)
+  include_tasks: start_or_restart.yml
+  loop: "{{ services }}"
+  loop_control:
+    loop_var: svc
+    label: "{{ svc.name }}"

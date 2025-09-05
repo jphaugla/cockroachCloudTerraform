@@ -1,4 +1,4 @@
-ootstrap.servers={{kafka_internal_ip}}:9092
+bootstrap.servers={{kafka_internal_ip}}:9092
 zookeeper.connect={{kafka_internal_ip}}:2181
 confluent.controlcenter.data.dir=/var/lib/confluent/control-center
 confluent.controlcenter.connect.connect-cluster.cluster=http://{{kafka_internal_ip}}:8083
@@ -17,3 +17,6 @@ confluent.monitoring.interceptor.topic.replication=1
 confluent.metrics.topic.partitions=1
 confluent.metrics.topic.replication=1
 confluent.controlcenter.streams.num.stream.threads=2
+confluent.controlcenter.mode.enable=management
+confluent.controlcenter.prometheus.enable=false
+

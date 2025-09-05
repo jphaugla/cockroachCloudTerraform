@@ -5,3 +5,6 @@ bootstrap.servers={{kafka_internal_ip}}:9092
 compression.type=snappy
 ksql.schema.registry.url=http://{{kafka_internal_ip}}:8081
 state.dir=/var/lib/kafka-streams
+confluent.support.metrics.enable=false
+confluent.telemetry.enabled=false
+

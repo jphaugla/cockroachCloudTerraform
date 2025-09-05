@@ -9,10 +9,10 @@ export LOC=eastus2
 
 # CockroachDB Cloud values
 # this is the resource ID from cockroach cloud *Add a private Endpoint" screen that you copied while creeating the endpoint
-export CRDB_ALIAS="/subscriptions/d8e1blah-81c9-blah-a361-blah652blah4/resourceGroups/mc_crl-blah-nqh-eastus2_blah_eblahs2/providers/Microsoft.Network/privateLinkServices/pls-blah6fa0blah8407a83bblahad1blah8"
+export CRDB_ALIAS="/subscriptions/d8e15818-81c9-4f58-a361-8ab665210014/resourceGroups/mc_crl-prod-nqq-eastus2_crdb_eastus2/providers/Microsoft.Network/privateLinkServices/pls-a18f9f07eb39540b4a65df3a283d78e0"
 export CRDB_PLS_ID=${CRDB_ALIAS}
 # this value can be found using the api script getClusters.sh
-export CRDB_INTERNAL_DNS=internal-jpblahla-crdb-ablahqblahure-eblahs2.cockroachlabs.cloud
+export CRDB_INTERNAL_DNS=internal-jphaugla-crdb-adv-nqq.azure-eastus2.cockroachlabs.cloud
 
 # Names you choose
 export PE_NAME=crdb-pe

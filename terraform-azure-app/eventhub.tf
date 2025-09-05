@@ -109,3 +109,17 @@ resource "azurerm_private_endpoint" "eh" {
     }
   }
 }
+# Explicit A record for the Event Hubs namespace in the Private DNS zone
+resource "azurerm_private_dns_a_record" "ehns" {
+  count                = var.deploy_event_hub && var.enable_private_dns ? 1 : 0
+  name                 = azurerm_eventhub_namespace.ehns[0].name            # "jphaugla-crdb-ehns"
+  zone_name            = azurerm_private_dns_zone.eh[0].name                # "privatelink.servicebus.windows.net"
+  resource_group_name  = local.resource_group_name
+  ttl                  = 300
+
+  # Provider v4.41.0 exposes the PE IP here:
+  records              = [azurerm_private_endpoint.eh[0].private_service_connection[0].private_ip_address]
+
+  depends_on = [azurerm_private_endpoint.eh]
+}
+

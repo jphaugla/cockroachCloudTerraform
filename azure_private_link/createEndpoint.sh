@@ -20,5 +20,7 @@ az network private-endpoint create \
   --request-message "CRDB PE from ${RG}/${VNET}"
 
 # Show the PE resource ID (paste this in Cockroach UI -> Validate)
+echo "the final output line is the private endpoint resource ID" 
+echo "Paste this value in Cockroach UI -> Validate)
 az network private-endpoint show -g "$RG" -n "$PE_NAME" --query id -o tsv
 

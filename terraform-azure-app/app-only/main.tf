@@ -51,9 +51,10 @@ module "app_nodes" {
   include_kafka                      = "yes"
   kafka_instance_type                = "Standard_b8ms"
   cockroach_api_token                = var.cockroach_api_token
-  crdb_private_endpoint_dns          = "internal-jphaugla-crdb-adv-nqh.azure-eastus2.cockroachlabs.cloud"
+  crdb_private_endpoint_dns          = "internal-jphaugla-crdb-adv-nqq.azure-eastus2.cockroachlabs.cloud"
   run_ansible                        = false
   deploy_azure_sql                   = true
+  enable_private_dns                 = true
   deploy_event_hub                   = true
 }
 

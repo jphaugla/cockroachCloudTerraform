@@ -1,0 +1,86 @@
+# ---- remove the nvm-incompatible settings from ~/.npmrc (keep cache OK) ----
+- name: Remove npm prefix/globalconfig from ~/.npmrc (conflicts with nvm)
+  become: true
+  become_user: "{{ login_username }}"
+  ansible.builtin.lineinfile:
+    path: "/home/{{ login_username }}/.npmrc"
+    state: absent
+    regexp: '^(prefix|globalconfig)\s*='
+  # ok if file doesn't exist yet
+  failed_when: false
+
+# (optional) ensure native libs present (skip libunwind on RHEL9)
+- name: Ensure native dependencies for Core Tools
+  become: true
+  ansible.builtin.dnf:
+    name:
+      - icu
+      - openssl-libs
+      - krb5-libs
+    state: present
+    update_cache: true
+
+# ---- install Core Tools v4 globally via npm (into nvm-managed prefix) ----
+- name: Install Azure Functions Core Tools v4 (npm global under nvm)
+  become: true
+  become_user: "{{ login_username }}"
+  ansible.builtin.shell: |
+    set -euo pipefail
+    export NVM_DIR="{{ (crdb_file_location | regex_replace('/+$','')) }}/nvm"
+    . "$NVM_DIR/nvm.sh"
+    # unset any lingering prefix in this shell just in case
+    npm config delete prefix >/dev/null 2>&1 || true
+    nvm use default --delete-prefix --silent
+    npm install -g azure-functions-core-tools@4 --unsafe-perm=true
+  args:
+    executable: /bin/bash
+
+# ---- find 'func' installed under the nvm-managed Node, then symlink & verify ----
+
+- name: Locate func binary under nvm
+  become: true
+  become_user: "{{ login_username }}"
+  shell: |
+    set -eo pipefail
+    export NVM_DIR="{{ (crdb_file_location | regex_replace('/+$','')) }}/nvm"
+    . "$NVM_DIR/nvm.sh"
+    nvm use default --silent
+    command -v func
+  args:
+    executable: /bin/bash
+  register: func_path
+  changed_when: false
+
+# Remove the old symlink if it exists
+- name: Remove previous /usr/local/bin/func symlink
+  become: true
+  file:
+    path: /usr/local/bin/func
+    state: absent
+    force: true
+
+# Write a wrapper that sources nvm and then execs the npm-installed func
+- name: Install func wrapper for non-interactive shells
+  become: true
+  copy:
+    dest: /usr/local/bin/func
+    mode: "0755"
+    content: |
+      #!/usr/bin/env bash
+      set -euo pipefail
+      export NVM_DIR="{{ (crdb_file_location | regex_replace('/+$','')) }}/nvm"
+      # shellcheck disable=SC1090
+      [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+      nvm use default >/dev/null
+      v="$(nvm current)"
+      exec "$NVM_DIR/versions/node/$v/bin/func" "$@"
+
+# Verify works without a login shell
+- name: Verify Azure Functions Core Tools
+  command: /usr/local/bin/func --version
+  register: func_ver
+  changed_when: false
+
+- debug:
+    msg: "Azure Functions Core Tools: {{ func_ver.stdout }}"
+

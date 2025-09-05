@@ -1,13 +1,25 @@
 # install npm depencies for nextEcommerce
+# --- App install: nextEcommerce dependencies ---
 - name: Install npm dependencies (nextEcommerce)
-  shell: npm install
+  become: true
+  become_user: "{{ login_username }}"
+  shell: |
+    set -euo pipefail
+    export NVM_DIR="{{ nvm_dir }}"
+    . "$NVM_DIR/nvm.sh"
+    nvm use default >/dev/null
+    if [ -f package-lock.json ]; then
+      npm ci --no-audit --no-fund
+    else
+      npm install --no-audit --no-fund
+    fi
   args:
-    chdir: "/opt/nextEcommerce"
+    chdir: "{{ crdb_file_location }}/nextEcommerce"
     executable: /bin/bash
-  environment:
-    HOME: "/home/{{ login_username }}"
+    creates: "{{ crdb_file_location }}/nextEcommerce/node_modules"
+
 - name: save environment script
   copy:
     content: "{{ lookup('template','setEenv.j2') }}"
-    dest: /opt/nextEcommerce/.env
+    dest: "{{ crdb_file_location }}/nextEcommerce/.env"
     mode: '0755'

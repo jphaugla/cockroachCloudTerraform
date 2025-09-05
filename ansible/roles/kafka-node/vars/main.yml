@@ -16,3 +16,12 @@ add_connectors: true
 use_hostname: kafka
 connect_endpoint: http://localhost:8083
 restapi_endpoint: http://localhost:8082
+kafka_host: "{{ kafka_internal_ip | default(ansible_default_ipv4.address) }}"
+services:
+   - { name: confluent-zookeeper,       port: 2181 }
+   - { name: confluent-server,          port: 9092 }
+   - { name: confluent-schema-registry, port: 8081, check_url: "http://{{ kafka_host }}:8081/subjects" }
+   - { name: confluent-kafka-connect,   port: 8083, check_url: "http://{{ kafka_host }}:8083/v1/metadata/id" }
+   - { name: confluent-kafka-rest,      port: 8082, check_url: "http://{{ kafka_host }}:8082/topics" }
+   - { name: confluent-ksqldb,          port: 8088, check_url: "http://{{ kafka_host }}:8088/info" }
+   - { name: confluent-control-center,  port: 9021, check_url: "http://{{ kafka_host }}:9021" }

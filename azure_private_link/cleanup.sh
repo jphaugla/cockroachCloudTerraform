@@ -1,3 +1,4 @@
+# cleanup.sh
 #!/usr/bin/env bash
 # deleteEndpoint.sh
 set -euo pipefail

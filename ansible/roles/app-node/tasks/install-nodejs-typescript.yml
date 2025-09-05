@@ -1,18 +1,115 @@
-- name: Get_nvm_install_script | {{ role_name | basename }}
-  tags: Get_nvm_install_script
+# tasks/main.yml  (final)
+
+# --- Variables expected:
+# login_username: e.g. "adminuser"
+# nvm_version:    e.g. "0.40.1"
+# node_version:   e.g. "20" or "23.11.0"
+# crdb_file_location: e.g. "/mnt/data"
+
+- name: Define NVM_DIR on big disk (absolute)
+  set_fact:
+    nvm_dir: "{{ (crdb_file_location | regex_replace('/+$','')) }}/nvm"
+
+# Optional cleanup if a stray relative dir was created earlier
+- name: Remove mistaken relative nvm dir if present
+  become: true
+  file:
+    path: "mnt/data/nvm"
+    state: absent
+  when: nvm_dir != "mnt/data/nvm"
+
+- name: Ensure NVM_DIR & npm dirs exist
+  become: true
+  file:
+    path: "{{ item }}"
+    state: directory
+    owner: "{{ login_username }}"
+    group: "{{ login_username }}"
+    mode: "0755"
+  loop:
+    - "{{ nvm_dir }}"
+    - "{{ crdb_file_location }}/npm-cache"
+    - "{{ crdb_file_location }}/npm-global"
+
+- name: Fetch nvm install script
   get_url:
-    url: https://raw.githubusercontent.com/nvm-sh/nvm/v{{ nvm_version }}/install.sh
-    dest: "/home/{{ login_username }}/nvm_install.sh"
-    force: true
+    url: "https://raw.githubusercontent.com/nvm-sh/nvm/v{{ nvm_version }}/install.sh"
+    dest: "/tmp/nvm_install.sh"
+    mode: "0755"
 
-- name: Install_or_update_nvm | {{ role_name | basename }}
-  tags: Install_or_update_nvm
-  command: bash /home/{{ login_username }}/nvm_install.sh
+# Install nvm *into* {{ nvm_dir }} without editing user dotfiles
+- name: Install nvm to custom dir
+  become: true
+  become_user: "{{ login_username }}"
+  environment:
+    NVM_DIR: "{{ nvm_dir }}"
+    PROFILE: "/dev/null"
+  shell: bash /tmp/nvm_install.sh
+  args:
+    creates: "{{ nvm_dir }}/nvm.sh"
 
-- name: Install_nodejs | {{ role_name | basename }}
-  tags: Install_nodejs
+# Make nvm available for logins/non-interactive shells
+- name: Write /etc/profile.d/nvm.sh
+  become: true
+  copy:
+    dest: /etc/profile.d/nvm.sh
+    mode: "0644"
+    content: |
+      export NVM_DIR="{{ nvm_dir }}"
+      [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
+      [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
+
+# Install Node and set default
+# (Unset NPM_CONFIG_PREFIX, which conflicts with nvm install)
+- name: Install Node {{ node_version }} and set default
+  become: true
+  become_user: "{{ login_username }}"
   shell: |
-    source /home/{{ login_username }}/.nvm/nvm.sh
+    set -eo pipefail
+    unset NPM_CONFIG_PREFIX npm_config_prefix
+    export NVM_DIR="{{ nvm_dir }}"
+    . "$NVM_DIR/nvm.sh"
     nvm install {{ node_version }}
+    nvm alias default {{ node_version }}
+    node -v && npm -v
   args:
     executable: /bin/bash
+
+# Configure npm to use big-disk locations via ~/.npmrc (no env var needed)
+- name: Configure npm prefix/cache in ~/.npmrc
+  become: true
+  become_user: "{{ login_username }}"
+  copy:
+    dest: "/home/{{ login_username }}/.npmrc"
+    mode: "0644"
+    content: |
+      prefix={{ crdb_file_location }}/npm-global
+      cache={{ crdb_file_location }}/npm-cache
+
+# Ensure global npm bin is on PATH for all users
+- name: Add global npm bin to PATH
+  become: true
+  copy:
+    dest: /etc/profile.d/npm-global.sh
+    mode: "0644"
+    content: |
+      export PATH="{{ crdb_file_location }}/npm-global/bin:$PATH"
+
+# --- App install: nextEcommerce dependencies ---
+- name: Install npm dependencies (nextEcommerce)
+  become: true
+  become_user: "{{ login_username }}"
+  shell: |
+    set -euo pipefail
+    export NVM_DIR="{{ nvm_dir }}"
+    . "$NVM_DIR/nvm.sh"
+    nvm use default >/dev/null
+    if [ -f package-lock.json ]; then
+      npm ci --no-audit --no-fund
+    else
+      npm install --no-audit --no-fund
+    fi
+  args:
+    chdir: "{{ crdb_file_location }}/nextEcommerce"
+    executable: /bin/bash
+    creates: "{{ crdb_file_location }}/nextEcommerce/node_modules"
