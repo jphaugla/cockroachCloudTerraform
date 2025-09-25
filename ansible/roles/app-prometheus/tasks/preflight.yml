@@ -1,30 +1,26 @@
 ---
+# tasks/preflight.yml
 - name: Assert usage of systemd as an init system
   ansible.builtin.assert:
     that: ansible_service_mgr == 'systemd'
     msg: "This module only works with systemd"
 
-- name: Install package fact dependencies
+# Install python-apt only on Debian/Ubuntu when using apt
+- name: Install package fact dependencies (Debian/Ubuntu)
   become: true
   ansible.builtin.package:
-    name: "{{ _pkg_fact_req }}"
+    name: "{{ 'python-apt' if ansible_python_version is version('3', '<') else 'python3-apt' }}"
     state: present
-  when: (_pkg_fact_req)
-  vars:
-    _pkg_fact_req: "{% if (ansible_pkg_mgr == 'apt') %}\
-                    {{ ('python-apt' if ansible_python_version is version('3', '<') else 'python3-apt') }}
-                    {% else %}\
-                    {% endif %}"
+  when: ansible_pkg_mgr == 'apt'
 
 - name: Gather package facts
   ansible.builtin.package_facts:
-  when: "not 'packages' in ansible_facts"
+  when: "'packages' not in ansible_facts"
 
 - name: Assert that used version supports listen address type
   ansible.builtin.assert:
     that:
-      - >-
-        prometheus_web_listen_address is string
+      - prometheus_web_listen_address is string
 
 - name: Naive assertion of proper listen address
   ansible.builtin.assert:
@@ -56,7 +52,7 @@
     msg: >
       Whooops. You are duplicating configuration. Please look at your prometheus_config_flags_extra
       and check against other variables in defaults/main.yml
-  with_items:
+  loop:
     - 'storage.tsdb.retention'
     - 'storage.tsdb.path'
     - 'storage.local.retention'
@@ -76,8 +72,7 @@
     msg: >
       Oh, snap! `{{ item.key }}` couldn't be found in your scrape configs. Please ensure you provided
       all targets from prometheus_targets in prometheus_scrape_configs
-  when: not prometheus_config_dir + "/file_sd/" + item.key + ".yml" in file_sd_files
-  #  when: not item | basename | splitext | difference(['.yml']) | join('') in prometheus_targets.keys()
+  when: not prometheus_config_dir + '/file_sd/' + item.key + '.yml' in file_sd_files
   with_dict: "{{ prometheus_targets }}"
 
 - name: Alert when prometheus_alertmanager_config is empty, but prometheus_alert_rules is specified

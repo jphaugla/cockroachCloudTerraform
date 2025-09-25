@@ -63,6 +63,11 @@
   when:
     - create_der_certs|bool
 
+- name: create sql user
+  include_tasks: create-sql-user.yml
+  when:
+    - create_sql_user|bool
+
 - name: start java application
   include_tasks: start-java-app.yml
   when:

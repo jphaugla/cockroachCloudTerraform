@@ -1,0 +1,34 @@
+# create-sql-user.yml
+- name: Create temp dir for user creation payload
+  ansible.builtin.tempfile:
+    state: directory
+    suffix: crdb_user_create
+  register: tmpdir
+
+- name: Render newuser.json (contains secret)
+  ansible.builtin.template:
+    src: newuser.json.j2
+    dest: "{{ tmpdir.path }}/newuser.json"
+    mode: "0600"
+  no_log: true
+
+- name: Create SQL user {{ db_admin_user }} via CockroachDB Cloud API
+  ansible.builtin.script: create_sql_user.sh
+  environment:
+    CRDB_CLOUD_URL: "{{ crdb_cloud_url }}"
+    CLUSTER_ID: "{{ cluster_id }}"
+    COCKROACH_API_TOKEN: "{{ cockroach_api_token }}"
+    BODY_FILE: "{{ tmpdir.path }}/newuser.json"
+  register: create_user_result
+  changed_when: "'User created.' in create_user_result.stdout"
+  no_log: true
+
+- name: Result
+  ansible.builtin.debug:
+    msg: "{{ 'Created user ' ~ db_admin_user if 'User created.' in create_user_result.stdout else 'User already exists: ' ~ db_admin_user }}"
+
+- name: Remove temp dir and payload
+  ansible.builtin.file:
+    path: "{{ tmpdir.path }}"
+    state: absent
+

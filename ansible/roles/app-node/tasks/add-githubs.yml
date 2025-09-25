@@ -18,3 +18,10 @@
   git:
     repo: 'https://github.com/jphaugla/nextEcommerce.git'
     dest: "{{ crdb_file_location }}/nextEcommerce"
+
+# ignore errors because get an error if running this second time 
+- name: checkout azureSQLtoCockroachDB
+  ignore_errors: yes
+  git:
+    repo: 'https://github.com/jphaugla/azureSQLtoCockroachDB.git'
+    dest: "{{ crdb_file_location }}/azureSQLtoCockroachDB"

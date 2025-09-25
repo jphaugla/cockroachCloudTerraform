@@ -1,4 +1,4 @@
-# providers.tf
+# terraform-azure-app/providers.tf
 terraform {
   required_providers {
     cockroach = {
@@ -7,7 +7,7 @@ terraform {
     }
     azurerm   = {
       source  = "hashicorp/azurerm"
-      version = "~> 4.41.0"
+      version = ">= 4.5.0"
     }
     local     = {
       source  = "hashicorp/local"

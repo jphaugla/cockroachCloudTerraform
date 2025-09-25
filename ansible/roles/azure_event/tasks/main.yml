@@ -1,3 +1,5 @@
+- meta: end_play
+  when: not deploy_event_hub
 # ---- remove the nvm-incompatible settings from ~/.npmrc (keep cache OK) ----
 - name: Remove npm prefix/globalconfig from ~/.npmrc (conflicts with nvm)
   become: true

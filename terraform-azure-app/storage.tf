@@ -1,6 +1,6 @@
 # storage.tf
 resource "azurerm_storage_account" "app_storage" {
-  name                     = "${var.owner}${var.resource_name}sa"
+  name                     = "${var.owner}${var.resource_name}sa2"
   resource_group_name      = local.resource_group_name
   location                 = var.virtual_network_location
   account_tier             = "Standard"

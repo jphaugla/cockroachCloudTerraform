@@ -7,29 +7,29 @@
         delay: 5
         timeout: 300
         sleep: 5
-#- hosts: all_public_node_ips
-#  gather_facts: no
-#  roles:
-#    - common
-#- hosts: app_node_ips
-#  gather_facts: yes
-#  roles:
-#    - app-node
-#- hosts: app_node_ips
-#  gather_facts: yes
-#  roles:
-#    - replicator-molt
-#- hosts: app_node_ips
-#  gather_facts: True
-#  roles:
-#    - app-prometheus
-#- hosts: kafka_node_ips
-#  gather_facts: false
-#  become: yes
-#  become_user: root
-#  become_method: sudo
-#  roles:
-#    - kafka-node
+- hosts: all_public_node_ips
+  gather_facts: no
+  roles:
+    - common
+- hosts: app_node_ips
+  gather_facts: yes
+  roles:
+    - app-node
+- hosts: app_node_ips
+  gather_facts: yes
+  roles:
+    - replicator-molt
+- hosts: app_node_ips
+  gather_facts: True
+  roles:
+    - app-prometheus
+- hosts: kafka_node_ips
+  gather_facts: false
+  become: yes
+  become_user: root
+  become_method: sudo
+  roles:
+    - kafka-node
 - hosts: app_node_ips
   gather_facts: true
   become: yes

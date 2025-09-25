@@ -1,0 +1,1 @@
+CREATE EXTERNAL CONNECTION azure_cdc AS 'azure://app-uploads/cdc?AZURE_ACCOUNT_NAME=jphauxxxxxdbsa2&AZURE_ACCOUNT_KEY=dckJH6yxblahblahisCEQVGWUOz8y%2BgRsblahblahETrzxGkbLxGO9WmWIgzz2ncblahblah9%2BZz%blahblahb9g%3D%3D';

@@ -1,0 +1,30 @@
+# tasks/create-sql-user.yml
+
+- name: Create SQL user via CockroachDB Cloud API
+  vars:
+    api_url: "https://{{ crdb_cloud_url }}/api/v1/clusters/{{ cluster_id }}/sql-users"
+  ansible.builtin.uri:
+    url: "{{ api_url }}"
+    method: POST
+    headers:
+      Authorization: "Bearer {{ cockroach_api_token }}"
+      Cc-Version: "2024-09-16"
+    body_format: json
+    body:
+      name: "{{ db_admin_user }}"
+      password: "{{ db_admin_password }}"
+    status_code: [200, 201, 409]   # 409: user already exists
+    return_content: true
+    # validate_certs: no           # <-- uncomment for test boxes with broken trust stores
+  register: create_user
+  delegate_to: localhost
+  run_once: true
+
+- name: Show outcome
+  ansible.builtin.debug:
+    msg: >-
+      {{ 'Created user ' ~ db_admin_user if create_user.status in [200, 201]
+         else 'User already exists: ' ~ db_admin_user }}
+  delegate_to: localhost
+  run_once: true
+

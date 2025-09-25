@@ -1,4 +1,4 @@
-# tasks/main.yml  (final)
+# tasks/install-nodejs-typescript.yml
 
 # --- Variables expected:
 # login_username: e.g. "adminuser"
@@ -18,7 +18,7 @@
     state: absent
   when: nvm_dir != "mnt/data/nvm"
 
-- name: Ensure NVM_DIR & npm dirs exist
+- name: Ensure NVM_DIR & npm-cache dirs exist
   become: true
   file:
     path: "{{ item }}"
@@ -29,7 +29,6 @@
   loop:
     - "{{ nvm_dir }}"
     - "{{ crdb_file_location }}/npm-cache"
-    - "{{ crdb_file_location }}/npm-global"
 
 - name: Fetch nvm install script
   get_url:
@@ -59,11 +58,32 @@
       [ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"
       [ -s "$NVM_DIR/bash_completion" ] && . "$NVM_DIR/bash_completion"
 
+# --- Ensure ~/.npmrc is nvm-compatible BEFORE installing Node ---
+- name: Remove npm prefix/globalconfig from ~/.npmrc (conflicts with nvm)
+  become: true
+  become_user: "{{ login_username }}"
+  ansible.builtin.lineinfile:
+    path: "/home/{{ login_username }}/.npmrc"
+    state: absent
+    regexp: '^(prefix|globalconfig)\s*='
+  failed_when: false
+
+- name: Ensure ~/.npmrc has only cache setting
+  become: true
+  become_user: "{{ login_username }}"
+  copy:
+    dest: "/home/{{ login_username }}/.npmrc"
+    mode: "0644"
+    content: |
+      cache={{ crdb_file_location }}/npm-cache
+
 # Install Node and set default
 # (Unset NPM_CONFIG_PREFIX, which conflicts with nvm install)
 - name: Install Node {{ node_version }} and set default
   become: true
   become_user: "{{ login_username }}"
+  environment:
+    HOME: "/home/{{ login_username }}"
   shell: |
     set -eo pipefail
     unset NPM_CONFIG_PREFIX npm_config_prefix
@@ -75,26 +95,6 @@
   args:
     executable: /bin/bash
 
-# Configure npm to use big-disk locations via ~/.npmrc (no env var needed)
-- name: Configure npm prefix/cache in ~/.npmrc
-  become: true
-  become_user: "{{ login_username }}"
-  copy:
-    dest: "/home/{{ login_username }}/.npmrc"
-    mode: "0644"
-    content: |
-      prefix={{ crdb_file_location }}/npm-global
-      cache={{ crdb_file_location }}/npm-cache
-
-# Ensure global npm bin is on PATH for all users
-- name: Add global npm bin to PATH
-  become: true
-  copy:
-    dest: /etc/profile.d/npm-global.sh
-    mode: "0644"
-    content: |
-      export PATH="{{ crdb_file_location }}/npm-global/bin:$PATH"
-
 # --- App install: nextEcommerce dependencies ---
 - name: Install npm dependencies (nextEcommerce)
   become: true
@@ -103,7 +103,8 @@
     set -euo pipefail
     export NVM_DIR="{{ nvm_dir }}"
     . "$NVM_DIR/nvm.sh"
-    nvm use default >/dev/null
+    # Clear any lingering npm prefix/env that conflicts with nvm
+    nvm use --delete-prefix default --silent
     if [ -f package-lock.json ]; then
       npm ci --no-audit --no-fund
     else

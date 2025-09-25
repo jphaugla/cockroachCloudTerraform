@@ -10,7 +10,7 @@ data "cockroach_folder" "target" {
 resource "cockroach_cluster" "advanced" {
   count = var.create_cluster ? 1 : 0
 
-  name           = "${var.owner}-${var.project_name}-adv-aws"
+  name           = "${var.owner}-${var.project_name}-adv-${var.cloud_provider}"
   parent_id      = data.cockroach_folder.target[0].id
   cloud_provider = var.cloud_provider    # e.g. "AWS"
   plan           = var.plan              # e.g. "ADVANCED"

@@ -3,6 +3,7 @@ save_ips: true
 maven_version: '3.9.11'
 #  this works fine but the maven version keeps changing so setting to true
 install_java_maven_go: true
+create_sql_user: true
 #  this isn't working
 install_dbworkload: false
 add_githubs: true
