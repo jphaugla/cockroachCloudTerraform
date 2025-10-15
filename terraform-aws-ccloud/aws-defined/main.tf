@@ -46,6 +46,7 @@ create_cluster       = false
 source               = "../"
 sql_user_name 	     = "jhaugland"
 sql_user_password    = "jasonrocks123456789"
+cockroach_server     = var.cockroach_server
 my_ip_address        = "67.220.19.36"
 # ----------------------------------------
 # The following was created to account for NetSkope Tunneling

@@ -5,7 +5,7 @@ data "cockroach_folder" "target" {
 }     
 
 resource "cockroach_cluster" "advanced" {
-  name           = "${var.owner}-${var.project_name}-adv-${var.cloud_provider}"
+  name           = "${var.owner}-${var.project_name}-adv-azure"
   parent_id      = data.cockroach_folder.target.id   # put cluster in this folder :contentReference[oaicite:1]{index=1}
   cloud_provider = var.cloud_provider    # e.g. "AWS"
   plan           = var.plan              # "ADVANCED"
@@ -18,6 +18,13 @@ resource "cockroach_cluster" "advanced" {
   regions = local.effective_regions
 
   delete_protection = var.delete_protection
+# Azure identity you’ve prepped for CockroachDB Cloud to use in your subscription
+  customer_cloud_account = var.byoc_enabled ? {
+    azure = {
+      subscription_id = var.subscription_id
+      tenant_id       = var.tenant_id
+    }
+  } : null
 }
 
 # one allow-list entry per Netskope CIDR

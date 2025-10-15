@@ -40,7 +40,8 @@ ansible-playbook \
   -e "subnet_name=${azurerm_subnet.private[0].name}" \
   -e "cluster_id=${var.crdb_cluster_id}" \
   -e "owner=${var.owner}" \
-  -e "crdb_cloud_url=${var.crdb_cloud_url}" \
+  -e "cockroach_server=${var.cockroach_server}" \
+  -e "crdb_cloud_url=${local.crdb_cloud_url}" \
   -e "deploy_event_hub=${var.deploy_event_hub}" \
   -e "deploy_azure_sql=${var.deploy_azure_sql}" \
   -e "bucket_name=${local.bucket_name}" 

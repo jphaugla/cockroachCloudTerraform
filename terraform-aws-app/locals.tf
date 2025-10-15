@@ -16,6 +16,9 @@ locals {
 
   # maximum AZs we want to consume
   desired_az_count = 3
+  # strip scheme and any trailing slash
+  _server_no_scheme = replace(replace(var.cockroach_server, "https://", ""), "http://", "")
+  crdb_cloud_url    = trim(local._server_no_scheme, "/")
 
   # how many AZ names are actually returned here?
   actual_az_count = length(data.aws_availability_zones.available.names)
@@ -33,6 +36,7 @@ locals {
   # If you prefer, you can use try(...) instead of length(...):
   # kafka_private_ip = var.include_kafka == "yes" ? try(aws_instance.kafka[0].private_ip, "") : ""
   kafka_private_ip = var.include_kafka == "yes" && length(aws_instance.kafka) > 0 ? aws_instance.kafka[0].private_ip : ""
+  app_private_ip = var.include_app == "yes" && length(aws_instance.app) > 0 ? aws_instance.app[0].private_ip : ""
 }
 
 data "aws_availability_zones" "available" {

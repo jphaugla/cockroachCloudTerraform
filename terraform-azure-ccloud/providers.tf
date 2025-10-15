@@ -6,7 +6,7 @@ terraform {
     }
     cockroach = {
       source  = "cockroachdb/cockroach"
-      version = ">= 1.12.2"
+      version = ">= 1.15.1"
     }
     local = {
       source  = "hashicorp/local"

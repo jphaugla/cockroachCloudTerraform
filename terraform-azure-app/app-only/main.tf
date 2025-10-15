@@ -19,16 +19,18 @@ data "terraform_remote_state" "cluster" {
 
 module "app_nodes" {
   source                           = "../"
-  ssh_private_key                  = "~/.ssh/jhaugland-eastus2.pem"
+  ssh_private_key                  = "~/.ssh/jhaugland-byoc-centralus.pem"
   ssh_key_resource_group           = "jhaugland-rg"
-  ssh_key_name                     = "jhaugland-eastus2"
+  ssh_key_name                     = "jhaugland-byoc-centralus"
   virtual_network_cidr             = "192.168.3.0/24"
   app_vm_size                      = "Standard_b8ms"
   haproxy_vm_size                  = "Standard_b8ms"
   app_disk_size                    = 128
-  my_ip_address                    = "162.222.52.25"
+  my_ip_address                    = "67.220.19.71"
   netskope_ips                     = ["8.36.116.0/24", "8.39.144.0/24", "31.186.239.0/24", "163.116.128.0/17", "162.10.0.0/17", "69.120.106.187"]
-  crdb_version                     = "25.3.1"
+  crdb_version                     = "25.3.2"
+#  picks up from TF_VAR_cockroach_server
+  cockroach_server                = var.cockroach_server
 
   # CRDB info from Phase 1
   crdb_cluster_id                  = data.terraform_remote_state.cluster.outputs.crdb_cluster_id
@@ -48,13 +50,13 @@ module "app_nodes" {
   inventory_template_file            = "templates/inventory.tpl"
   ansible_verbosity_switch           =  "-v"
   # kafka
-  include_kafka                      = "yes"
+  include_kafka                      = "no"
   kafka_instance_type                = "Standard_b8ms"
   cockroach_api_token                = var.cockroach_api_token
-  crdb_private_endpoint_dns          = "internal-jphaugla-crdb-adv-nqq.azure-eastus2.cockroachlabs.cloud"
-  run_ansible                        = false
-  deploy_azure_sql                   = true
+  crdb_private_endpoint_dns          = "internal-jphaugla-crdb-adv-azure-9zpx.azure-centralus.crdb.io"
+  run_ansible                        = true
+  deploy_azure_sql                   = false
   enable_private_dns                 = true
-  deploy_event_hub                   = true
+  deploy_event_hub                   = false
 }
 

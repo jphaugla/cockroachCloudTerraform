@@ -1,5 +1,7 @@
-- meta: end_play
-  when: not deploy_event_hub
+- name: Stop the play if Event Hub is disabled or unset
+  ansible.builtin.meta: end_play
+  when: not (deploy_event_hub | default(false) | bool)
+
 # ---- remove the nvm-incompatible settings from ~/.npmrc (keep cache OK) ----
 - name: Remove npm prefix/globalconfig from ~/.npmrc (conflicts with nvm)
   become: true

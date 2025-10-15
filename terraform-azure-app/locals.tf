@@ -11,4 +11,7 @@ locals {
   bucket_name = "${var.owner}-${var.resource_name}-${var.virtual_network_location}-molt-bucket"
   kafka_private_ip = var.include_kafka == "yes" && length(azurerm_linux_virtual_machine.kafka) > 0 ? azurerm_linux_virtual_machine.kafka[0].private_ip_address : ""
   sql_user_password = "${var.sql_user_password}!"
+ # strip scheme and any trailing slash
+  _server_no_scheme = replace(replace(var.cockroach_server, "https://", ""), "http://", "")
+  crdb_cloud_url    = trim(local._server_no_scheme, "/")
 }

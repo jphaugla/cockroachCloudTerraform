@@ -11,6 +11,12 @@ variable "cloud_provider" {
   default     = "AWS"
 }
 
+variable "cockroach_server" {
+  description = "Cockroach Cloud API server for the URL"
+  type        = string
+  default     = "https://cockroachlabs.cloud"
+}
+
 variable "plan" {
   description = "Cluster plan: BASIC, STANDARD, or ADVANCED"
   type        = string
@@ -262,6 +268,11 @@ variable "crdb_service_name" {
       type        = string
       default     = ""
     }
+   variable "use_trusted_owners" {
+     description = "use trusted owners on this cockroachdb account"
+     type        = bool
+     default     = false
+   }
 
     variable "prometheus_app_string" {
       description = "The  prometheus string to use at start-up.  Do not supply a value"
@@ -272,12 +283,6 @@ variable "crdb_service_name" {
     variable "cockroach_api_token" {
       description = "Cockroach Cloud API token (picks up from TF_VAR_cockroach_api_token)"
       type        = string
-    }
-
-    variable "crdb_cloud_url" {
-      description = "Cockroach Cloud API url"
-      type        = string
-      default     = "cockroachlabs.cloud"
     }
 
     variable "create_iam_resources" {

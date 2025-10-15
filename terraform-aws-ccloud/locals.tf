@@ -22,5 +22,6 @@ locals {
 
   region_count   = length(local.crdb_private_endpoint_dns_list)
   default_region = var.aws_region_list[0]
+  cluster_name = "${var.owner}-${var.project_name}-adv-aws"
 }
 

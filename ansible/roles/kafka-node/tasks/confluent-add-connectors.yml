@@ -49,7 +49,7 @@
 - name: create sample transaction to create topic
   ignore_errors: true
   get_url:
-    url: "http://{{lookup('file', './temp/{{region}}/app_internal_ip.txt')}}:8080/api/transaction/save?doKafka=true&accountId=3bb4822a-4a83-42e4-a9cd-ad095d0eaed3"
+    url: "http://{{ app_private_ip }}:8080/api/transaction/save?doKafka=true&accountId=3bb4822a-4a83-42e4-a9cd-ad095d0eaed3"
     validate_certs: false
     dest: ./topic.log
     headers:

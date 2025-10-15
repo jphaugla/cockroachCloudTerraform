@@ -40,13 +40,17 @@ This repository contains Terraform/Ansible configurations to provision and manag
 
 1. **Terraform**: v1.5+ installed.
 2. Depending on AWS or azure, set the environment
-   - **AWS credentials**: Configure via environment variables or `~/.aws/credentials`.
+   - **AWS credentials**: Configure via environment variables, SSO, or `~/.aws/credentials`.
    - **Azure credentials**: az login
-3. **Cockroach Cloud API TOKEN**:
+3. **Cockroach Cloud API TOKEN** and **COCKROACH_SERVER**
 ```bash
 export COCKROACH_API_TOKEN=CCDB1_BLAHkjC2MBLAHXGZ6SyyYc_BLAHULj7mwmBLAHz3I84svqdBLAHchx33InBLAH
 export TF_VAR_cockroach_api_token="${COCKROACH_API_TOKEN}"
+export COCKROACH_SERVER="https://cockroachlabs.cloud"
+export TF_VAR_cockroach_server="${COCKROACH_SERVER}"
 ```
+4. Know the IP address of the machine running the terraform so the ansible can connect using ssh and so the workstation has access to cloud ui and such.  [https://ifconfig.co}(https://ifconfig.co) will get workstation address
+5. Must pre-create the ssh keys, download the keys  and reference them correctly 
 
 ## Quick Start for AWS single or multi-region.  
 NOTES: 
@@ -63,9 +67,13 @@ NOTES:
    ```
 2. **set enable_private_dns to false**
 - edit main.tf to set enable_private_dns = false
+- edit the ssh_private_key_list and the aws_instance_keys
 - set all the other parameters for the deployment in main.tf
 - ensure the COCKROACH_API_TOKEN and TF_VAR_cockroach_api_token environment variables are set
+- ensure the COCKROACH_SERVER and TF_VAR_cockroach_server environment variables are set
 - ensure aws project information is set up 
+- determine if trusted owners are used in the cloud environment and set "use_trusted_owners"
+- if running byoc, set byoc_enabled to true and set the byoc_aws_account_id and the byoc_aws_role_arn
 
 3. **Initialize Terraform**
    ```bash
@@ -148,16 +156,18 @@ NOTE:  When this terraform apply is complete, there is a cockroach cloud instanc
    ```
 NOTE:  When this terraform apply is complete, there is a application server, kafka server and a network but nothing is installed
 ### Create Azure Privatelink and DNS 
-* Use CLI scripts provided in [azure_private_link subdirectory](azure_private_link) or follow [documented steps to create a privatelink and DNS in your azure account](https://www.cockroachlabs.com/docs/cockroachcloud/connect-to-an-advanced-cluster#azure-private-link).  
-   * To use the [azure_private_link subdirectory](azure_private_link) steps:
-     * Adjust environment variables in the [setEnv.sh](setEnv.sh).  Crucial to enter the correct paramaters that match the network and the values from the current environment using [getClusters.sh](api/getClusters.sh).
+* Use CLI scripts provided in [azure_pe subdirectory](azure_pe) or follow [documented steps to create a privatelink and DNS in your azure account](https://www.cockroachlabs.com/docs/cockroachcloud/connect-to-an-advanced-cluster#azure-private-link).  
+   * To use the [azure_pe subdirectory](azure_pe) steps:
+     * Adjust environment variables in the [setEnv.sh](setEnv.sh).  Crucial to enter the correct paramaters that match the network and the values from the current environment using [getClusters.sh](api/getClusters.sh).  The CRDB_INTERNAL_DNS comes from the getClusters.sh
        * make sure to put the Resource ID from the *Add a private Endpoint* screen from cockroach cloud in the CRDB_ALIAS environment variable value
+       *the last output line of the createEndpointsh script has the resource ID needed for the endpoint.  This value must be placed in the private link defined in the cockroach cloud UI.  Copy this value in, click validate, and complete.
+       *before running addArecord.sh must set the PE_IP variable.  Get the correct IP by running getEndpointIP.sh script
    ```bash
-   cd azure_private_link
+   cd azure_pe
    source setEnv.sh
    ./createEndpoint.sh
-#  the last output line of this script has the resource ID needed for the endpoint.  This value must be placed in the private link defined in the cockroach cloud UI.  Copy this value in, click validate, and complete.
    ./dns_setup.sh
+   ./getEndpointIP.sh
    ./addArecord.sh
    ```
 ### Run the ansible to install application server, kafka, and prometheus with connectivity to cockroach cloud cluster
@@ -215,6 +225,7 @@ drop owned by jhaugland;
 DROP DATABASE IF EXISTS ecommerce CASCADE;
 DROP DATABASE IF EXISTS employees CASCADE;
 DROP DATABASE IF EXISTS kv CASCADE;
+DROP DATABASE IF EXISTS defaultdb CASCADE;
 drop user jhaugland;
 ```
 check for any other databases by doing *SHOW DATABASES*.   drop any of those databases if owned by jhaugland

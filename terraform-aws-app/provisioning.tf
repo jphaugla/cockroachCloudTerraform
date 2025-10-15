@@ -23,6 +23,7 @@ ansible-playbook \
   -e "region=${var.aws_region}" \
   -e include_kafka=${var.include_kafka} \
   -e kafka_internal_ip=${local.kafka_private_ip} \
+  -e app_private_ip=${local.app_private_ip} \
   -e kafka_username=ubuntu \
   -e "setup_migration=${var.setup_migration}" \
   -e "cluster_id=${var.crdb_cluster_id}" \
@@ -32,7 +33,8 @@ ansible-playbook \
   -e "crdb_file_location=${var.mount_file_location}" \
   -e "cockroach_api_token=${var.cockroach_api_token}" \
   -e "login_username=${local.admin_username}" \
-  -e "crdb_cloud_url=${var.crdb_cloud_url}" \
+  -e "cockroach_server=${var.cockroach_server}" \
+  -e "crdb_cloud_url=${local.crdb_cloud_url}" \
   -e "bucket_name=${local.bucket_name}" \
   -e "include_app=${var.include_app}"
 EOT

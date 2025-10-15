@@ -1,33 +1,37 @@
 # cluster.tf
-
-# Look up the folder by path (only when creating a new cluster)
+# Look up folder only when we create
 data "cockroach_folder" "target" {
   count = var.create_cluster ? 1 : 0
   path  = var.folder_path
 }
 
-# Create a new cluster ONLY when requested
 resource "cockroach_cluster" "advanced" {
-  count = var.create_cluster ? 1 : 0
-
-  name           = "${var.owner}-${var.project_name}-adv-${var.cloud_provider}"
+  count          = var.create_cluster ? 1 : 0
+  name           = local.cluster_name
   parent_id      = data.cockroach_folder.target[0].id
-  cloud_provider = var.cloud_provider    # e.g. "AWS"
-  plan           = var.plan              # e.g. "ADVANCED"
+  cloud_provider = var.cloud_provider   # e.g., "AWS"
+  plan           = var.plan             # e.g., "ADVANCED"
 
   dedicated = {
-    storage_gib      = var.storage_gib      # GiB per node
-    num_virtual_cpus = var.num_virtual_cpus # vCPUs per node
+    storage_gib      = var.storage_gib
+    num_virtual_cpus = var.num_virtual_cpus
   }
 
   regions           = local.effective_regions
   delete_protection = var.delete_protection
+
+  # ── BYOC: include only when enabled ──────────────────────────────────────────
+  customer_cloud_account = var.byoc_enabled ? {
+    aws = {
+      arn = var.byoc_aws_role_arn
+    }
+  } : null
 }
 
-# Unified handles for downstream code (no provider calls when create_cluster = false)
+
+# Unified handle for downstream resources
 locals {
-  # Caller provides existing_crdb_cluster_id when create_cluster = false
-  cluster_id = var.create_cluster ? cockroach_cluster.advanced[0].id : var.existing_crdb_cluster_id
+   cluster_id = var.create_cluster ? cockroach_cluster.advanced[0].id : var.existing_crdb_cluster_id
 }
 
 # ─────────────────────────────────────────────────────────────────────────────

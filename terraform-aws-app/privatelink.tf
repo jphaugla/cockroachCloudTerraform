@@ -29,15 +29,18 @@ resource "aws_vpc_endpoint" "crdb" {
   private_dns_enabled  = var.enable_private_dns
 }
 
-# Trust your AWS account so the connection can be established
-data "aws_caller_identity" "me" {}
+# Only needed if you're using trusted owners
+data "aws_caller_identity" "me" {
+  count = var.enable_privatelink && var.use_trusted_owners ? 1 : 0
+}
 
 resource "cockroach_private_endpoint_trusted_owner" "aws_account" {
-  count             = var.enable_privatelink ? 1 : 0
+  count             = var.enable_privatelink && var.use_trusted_owners ? 1 : 0
   cluster_id        = var.crdb_cluster_id
-  external_owner_id = data.aws_caller_identity.me.account_id
+  external_owner_id = data.aws_caller_identity.me[0].account_id
   type              = "AWS_ACCOUNT_ID"
 }
+
 
 # Establish the connection
 resource "cockroach_private_endpoint_connection" "aws" {

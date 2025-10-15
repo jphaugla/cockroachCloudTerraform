@@ -28,6 +28,7 @@ module "crdb-region-0" {
   source              = "../terraform-aws-app"
   enable_private_dns  = var.enable_private_dns
   enable_privatelink  = var.enable_privatelink
+  use_trusted_owners  = var.use_trusted_owners
   providers = {
     aws = aws.region0
   }
@@ -36,6 +37,7 @@ module "crdb-region-0" {
   project_name        = var.project_name
 
   # CockroachDB cluster inputs
+  cockroach_server          = var.cockroach_server
   crdb_cluster_id           = local.cluster_id
   crdb_cluster_cert         = local.crdb_cluster_cert
   crdb_private_endpoint_dns = local.crdb_private_endpoint_dns_list[0]
@@ -88,6 +90,7 @@ module "crdb-region-1" {
   source              = "../terraform-aws-app"
   enable_private_dns  = var.enable_private_dns
   enable_privatelink  = var.enable_privatelink
+  use_trusted_owners  = var.use_trusted_owners
   providers = {
     aws = aws.region1
   }
@@ -95,6 +98,7 @@ module "crdb-region-1" {
   owner               = var.owner
   project_name        = var.project_name
 
+  cockroach_server          = var.cockroach_server
   crdb_cluster_id           = local.cluster_id
   crdb_cluster_cert         = local.crdb_cluster_cert
   crdb_private_endpoint_dns = local.crdb_private_endpoint_dns_list[1]
@@ -142,6 +146,7 @@ module "crdb-region-2" {
   source              = "../terraform-aws-app"
   enable_private_dns  = var.enable_private_dns
   enable_privatelink  = var.enable_privatelink
+  use_trusted_owners  = var.use_trusted_owners
   providers = {
     aws = aws.region2
   }
@@ -149,6 +154,7 @@ module "crdb-region-2" {
   owner               = var.owner
   project_name        = var.project_name
 
+  cockroach_server          = var.cockroach_server
   crdb_cluster_id           = local.cluster_id
   crdb_cluster_cert         = local.crdb_cluster_cert
   crdb_private_endpoint_dns = local.crdb_private_endpoint_dns_list[2]

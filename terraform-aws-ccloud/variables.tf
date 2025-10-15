@@ -180,7 +180,7 @@ variable "crdb_service_name" {
     variable "crdb_version" {
       description = "CockroachDB Version"
       type        = string
-      default     = "25.2.1"
+      default     = "25.3.2"
     }
     variable "enable_private_dns" {
       description = "Whether to turn on AWS PrivateLink Private DNS"
@@ -228,6 +228,36 @@ variable "existing_crdb_public_endpoint_dns_list" {
   type        = list(string)
   default     = []
 }
+
+variable "cockroach_server" {
+  description = "Cockroach Cloud API server for the URL(picks up from TF_VAR_cockroach_server)"
+  type        = string
+}
+
+variable "use_trusted_owners" {
+  description = "use trusted owners on this cockroachdb account"
+  type        = bool
+  default     = false
+}
+
+variable "byoc_enabled" {
+  description = "Enable BYOC; include a customer_cloud_account.aws block"
+  type        = bool
+  default     = false
+}
+
+variable "byoc_aws_account_id" {
+  description = "Your AWS account ID that will host the BYOC cluster"
+  type        = string
+  default     = null
+}
+
+variable "byoc_aws_role_arn" {
+  description = "Cross-account IAM role ARN Cockroach Cloud will assume (trusts CRL control-plane)"
+  type        = string
+  default     = null
+}
+
 
 # ----------------------------------------
 # Kafka Instance Specifications
