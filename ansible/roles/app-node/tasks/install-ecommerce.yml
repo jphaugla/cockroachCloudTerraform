@@ -1,3 +1,4 @@
+# tasks/install-ecommerce.yml
 # install npm depencies for nextEcommerce
 # --- App install: nextEcommerce dependencies ---
 - name: Install npm dependencies (nextEcommerce)

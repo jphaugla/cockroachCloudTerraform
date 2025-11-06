@@ -1,0 +1,17 @@
+UPSERT INTO system.locations ("localityKey", "localityValue", latitude, longitude) VALUES
+('region', 'gcp-us-east1', 33.836082, -81.163727),
+('region', 'gcp-us-east4', 37.478397, -76.453077),
+('region', 'gcp-us-central1', 42.032974, -93.581543),
+('region', 'gcp-us-west1', 43.804133, -120.554201),
+('region', 'gcp-northamerica-northeast1', 56.130366, -106.346771),
+('region', 'gcp-europe-west1', 50.44816, 3.81886),
+('region', 'gcp-europe-west2', 51.507351, -0.127758),
+('region', 'gcp-europe-west3', 50.110922, 8.682127),
+('region', 'gcp-europe-west4', 53.4386, 6.8355),
+('region', 'gcp-europe-west6', 47.3769, 8.5417),
+('region', 'gcp-asia-east1', 24.0717, 120.5624),
+('region', 'gcp-asia-northeast1', 35.689487, 139.691706),
+('region', 'gcp-asia-southeast1', 1.352083, 103.819836),
+('region', 'gcp-australia-southeast1', -33.86882, 151.209296),
+('region', 'gcp-asia-south1', 19.075984, 72.877656),
+('region', 'gcp-southamerica-east1', -23.55052, -46.633309);

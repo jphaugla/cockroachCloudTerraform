@@ -1,27 +1,26 @@
-# ignore errors because get an error if running this second time after updating scripts/setEnv.sh
-- name: checkout Digital Banking git repo
-  ignore_errors: yes
-  git:
-    repo: 'https://github.com/jphaugla/Digital-Banking-CockroachDB'
-    dest: "{{ crdb_file_location }}/Digital-Banking-CockroachDB"
+# tasks/add-githubs.yml
+- name: Ensure base checkout dir exists
+  become: yes
+  ansible.builtin.file:
+    path: "{{ crdb_file_location }}"
+    state: directory
+    owner: "{{ login_username }}"
+    group: "{{ login_username }}"
+    mode: '0755'
 
-# ignore errors because get an error if running this second time 
-- name: checkout costCalculator	
-  ignore_errors: yes
-  git:
-    repo: 'https://github.com/jphaugla/costCalculator.git'
-    dest: "{{ crdb_file_location }}/costCalculator"
+- name: Clone or update repos
+  become: yes
+  become_user: "{{ login_username }}"
+  ansible.builtin.git:
+    repo: "{{ item.repo }}"
+    dest: "{{ crdb_file_location }}/{{ item.dest }}"
+    version: "{{ item.version | default('main') }}"
+    update: yes
+    force: yes            # 👈 reset --hard if dirty
+    accept_hostkey: yes
+  loop:
+    - { repo: "https://github.com/jphaugla/Digital-Banking-CockroachDB", dest: "Digital-Banking-CockroachDB" }
+    - { repo: "https://github.com/jphaugla/costCalculator.git",        dest: "costCalculator" }
+    - { repo: "https://github.com/jphaugla/nextEcommerce.git",         dest: "nextEcommerce" }
+    - { repo: "https://github.com/jphaugla/azureSQLtoCockroachDB.git", dest: "azureSQLtoCockroachDB" }
 
-# ignore errors because get an error if running this second time 
-- name: checkout nextEcommerce	
-  ignore_errors: yes
-  git:
-    repo: 'https://github.com/jphaugla/nextEcommerce.git'
-    dest: "{{ crdb_file_location }}/nextEcommerce"
-
-# ignore errors because get an error if running this second time 
-- name: checkout azureSQLtoCockroachDB
-  ignore_errors: yes
-  git:
-    repo: 'https://github.com/jphaugla/azureSQLtoCockroachDB.git'
-    dest: "{{ crdb_file_location }}/azureSQLtoCockroachDB"

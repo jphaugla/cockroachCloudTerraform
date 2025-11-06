@@ -1,15 +1,34 @@
-- name: install sysbench rpm script
-  get_url:
-    url: https://packagecloud.io/install/repositories/akopytov/sysbench/script.rpm.sh 
-    dest: script.rpm.sh
-
-- name: execute the rpm script
-  shell: 
-    cmd: script.rpm.sh
-
-# ignore errors because get an error if running this second time after updating scripts/setEnv.sh
-- name: Install sysbench
+# tasks/install-sysbench.yml
+# Debian/Ubuntu
+- name: Install sysbench (Debian/Ubuntu)
   become: yes
-  yum:
+  ansible.builtin.apt:
     name: sysbench
-    state: latest
+    state: present
+    update_cache: yes
+  when: is_debian
+
+# RHEL/CentOS/Fedora/Amazon
+- name: Install sysbench repo script (RHEL/Amazon)
+  become: yes
+  ansible.builtin.get_url:
+    url: https://packagecloud.io/install/repositories/akopytov/sysbench/script.rpm.sh
+    dest: /tmp/sysbench.repo.sh
+    mode: '0755'
+  when: is_rpm
+
+- name: Enable sysbench repo (RHEL/Amazon)
+  become: yes
+  ansible.builtin.command: /tmp/sysbench.repo.sh
+  args:
+    creates: /etc/yum.repos.d/akopytov_sysbench.repo
+  when: is_rpm
+
+- name: Install sysbench (RHEL/CentOS/Fedora/Amazon)
+  become: yes
+  ansible.builtin.dnf:
+    name: sysbench
+    state: present
+    use_backend: "{{ dnf_backend }}"
+  when: is_rpm
+

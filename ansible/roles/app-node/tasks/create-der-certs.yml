@@ -1,20 +1,18 @@
-- name: create ca.crt.der
+# tasks/create-der-certs.yml
+- name: Convert PEM to DER if missing
   become: yes
-  shell: |
-    # remove any leftover stale file
-    rm -f ca.crt.der
-    # convert PEM to DER
-    openssl x509 -outform der -in ca.crt -out ca.crt.der
+  ansible.builtin.command: openssl x509 -outform der -in ca.crt -out ca.crt.der
   args:
     chdir: "/home/{{ login_username }}/certs"
+    creates: "/home/{{ login_username }}/certs/ca.crt.der"
 
-- name: set strict permissions on cert files
+- name: Set permissions on cert files
   become: yes
-  file:
+  ansible.builtin.file:
     path: "/home/{{ login_username }}/certs/{{ item }}"
     owner: "{{ login_username }}"
     group: "{{ login_username }}"
-    mode: '0400'
+    mode: "{{ '0644' if item == 'ca.crt' else '0644' }}"
   loop:
     - ca.crt
     - ca.crt.der

@@ -1,9 +1,9 @@
 [kafka_node_ips]
-null
+${kafka_public_ip}
 [app_node_ips]
-172.202.115.45
+${app_public_ips}
 [all_public_node_ips]
-172.202.115.45
+${all_public_ips}
 [all:vars]
 ansible_connection=ssh
-ansible_user=adminuser
+ansible_user=${ssh_user}

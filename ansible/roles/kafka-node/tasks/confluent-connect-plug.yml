@@ -13,8 +13,27 @@
   shell:
     cmd:  rm -rf /usr/share/confluent-hub-components/confluentinc-kafka-connect-jdbc/lib/postgresql*
 
-- name: get new postgres jdbc driver
-  become: yes
+# Download once on the controller, then copy to every node.
+
+- name: fetch postgres jdbc driver to controller
+  become: false          # <— do NOT sudo on localhost
+  delegate_to: localhost
+  run_once: true
   get_url:
-    url: https://jdbc.postgresql.org/download/postgresql-42.7.3.jar 
-    dest: /usr/share/confluent-hub-components/confluentinc-kafka-connect-jdbc/lib
+    url: https://jdbc.postgresql.org/download/postgresql-42.7.3.jar
+    dest: /tmp/postgresql-42.7.3.jar
+    mode: "0644"
+  register: jdbc_fetch
+  retries: 5
+  delay: 10
+  until: jdbc_fetch is succeeded
+
+- name: copy postgres jdbc driver to node
+  become: yes
+  copy:
+    src: /tmp/postgresql-42.7.3.jar   # path on controller
+    dest: /usr/share/confluent-hub-components/confluentinc-kafka-connect-jdbc/lib/postgresql-42.7.3.jar
+    owner: root
+    group: root
+    mode: "0644"
+

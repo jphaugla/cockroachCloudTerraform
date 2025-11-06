@@ -2,122 +2,39 @@
 # roles/replicator-molt/tasks/install-postgres.yml
 
 - name: Debug OS information
-  become: yes
-  debug:
-    msg: >
-      The operating system is {{ ansible_facts['distribution'] }}
-      and the version is {{ ansible_facts['distribution_version'] }}
+  ansible.builtin.debug:
+    msg: "OS={{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }} pkg_mgr={{ ansible_facts['pkg_mgr'] }}"
 
-- name: Set variable if Amazon Linux
-  set_fact:
+- name: Set pkg_mgr fact
+  ansible.builtin.set_fact:
+    pkg_mgr: "{{ ansible_facts['pkg_mgr'] }}"
+
+- name: Set is_amazon_linux fact
+  ansible.builtin.set_fact:
     is_amazon_linux: "{{ ansible_facts['distribution'] == 'Amazon' }}"
-# ------------------------------------------------
-# PostgreSQL 15 YUM repo (non-Amazon)
-# ------------------------------------------------
-- name: Add PostgreSQL 15 YUM repository (non-Amazon)
-  become: yes
-  ansible.builtin.yum_repository:
-    name: pgdg15
-    description: "PostgreSQL 15 Community YUM repo"
-    baseurl: https://download.postgresql.org/pub/repos/yum/15/redhat/rhel-9-x86_64
-    gpgcheck: no
-    repo_gpgcheck: no
-    # point at the official key URL so DNF can fetch it
-    gpgkey: https://www.postgresql.org/download/keys/RPM-GPG-KEY-PGDG-RHEL
-    enabled: yes
-  when: not is_amazon_linux | bool
 
-# ------------------------------------------------
-# Install PostgreSQL server
-# ------------------------------------------------
-- name: Install postgresql-server (non-Amazon)
-  become: yes
-  dnf:
-    name: postgresql15-server
-    state: present
-  when: not is_amazon_linux | bool
-
-- name: Install postgresql-server (Amazon)
-  become: yes
-  dnf:
-    name: postgresql15-server
-    state: present
+# call the Amazon Linux workflow
+- name: Install & configure on Amazon Linux
+  ansible.builtin.import_tasks: install-postgres-amazon.yml
   when: is_amazon_linux | bool
 
-# ------------------------------------------------
-# Initialize database
-# ------------------------------------------------
-- name: Initialize PostgreSQL database (non-Amazon)
-  become: yes
-  shell:
-    cmd: /usr/pgsql-15/bin/postgresql-15-setup initdb
-    creates: /var/lib/pgsql/15/data/postgresql.conf
-  when: not is_amazon_linux | bool
+# call the RHEL/CentOS workflow
+- name: Install & configure on RHEL/CentOS
+  ansible.builtin.import_tasks: install-postgres-rhel.yml
+  when:
+    - pkg_mgr in ['yum','dnf']
+    - not is_amazon_linux | bool
 
-- name: Initialize PostgreSQL database (Amazon)
-  become: yes
-  shell:
-    cmd: /bin/postgresql-setup initdb
-    creates: /var/lib/pgsql/data/postgresql.conf
-  when: is_amazon_linux | bool
+# call the Ubuntu workflow
+- name: Install & configure on Debian/Ubuntu
+  ansible.builtin.import_tasks: install-postgres-ubuntu.yml
+  when: pkg_mgr == 'apt'
 
-# ------------------------------------------------
-# pg_hba.conf
-# ------------------------------------------------
-- name: Copy pg_hba.conf (non-Amazon)
+- name: Set PostgreSQL superuser password
   become: yes
-  copy:
-    src: pg_hba.conf
-    dest: /var/lib/pgsql/15/data/pg_hba.conf
-    owner: postgres
-    group: postgres
-    mode: '0600'
-  when: not is_amazon_linux | bool
+  ansible.builtin.shell: |
+    sudo -u postgres psql -v ON_ERROR_STOP=1 \
+      --command="ALTER USER postgres WITH PASSWORD '{{ db_admin_password }}';"
+  args:
+    executable: /bin/bash
 
-- name: Copy pg_hba.conf (Amazon)
-  become: yes
-  copy:
-    src: pg_hba.conf
-    dest: /var/lib/pgsql/data/pg_hba.conf
-    owner: postgres
-    group: postgres
-    mode: '0600'
-  when: is_amazon_linux | bool
-
-# ------------------------------------------------
-# Replication settings
-# ------------------------------------------------
-- name: Configure PostgreSQL replication settings
-  become: yes
-  blockinfile:
-    path: >-
-      {{ 
-        is_amazon_linux | bool 
-          and '/var/lib/pgsql/data/postgresql.conf'
-          or '/var/lib/pgsql/15/data/postgresql.conf'
-      }}
-    marker: "# {mark} ANSIBLE MANAGED POSTGRES REPLICATION CONFIG"
-    block: |
-      # Replication settings
-      wal_level = logical
-      max_wal_senders = 3
-      max_replication_slots = 3
-      wal_keep_size = 1024
-      hot_standby = on
-
-# ------------------------------------------------
-# Client libs for Python
-# ------------------------------------------------
-- name: Install psycopg2-binary (Amazon Linux 2023)
-  become: yes
-  pip:
-    name: psycopg2-binary
-    executable: pip3
-  when: is_amazon_linux | bool
-
-- name: Install python3-psycopg2 non-amazon linux
-  become: yes
-  package:
-    name: python3-psycopg2
-    state: present
-  when: not is_amazon_linux | bool

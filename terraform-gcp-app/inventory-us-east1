@@ -1,0 +1,9 @@
+[kafka_node_ips]
+35.237.189.112
+[app_node_ips]
+34.73.253.51
+[all_public_node_ips]
+34.73.253.51
+[all:vars]
+ansible_connection=ssh
+ansible_user=ubuntu

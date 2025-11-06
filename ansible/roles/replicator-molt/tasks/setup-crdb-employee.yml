@@ -1,39 +1,21 @@
-- name: copy create if not exist database command for cockroach
-  copy:
+- name: Copy SQL file
+  ansible.builtin.copy:
     src: createCRDB.sql
     dest: /tmp/createCRDB.sql
     mode: '0644'
 
-- name: create postgres user if not exists for cockroach
+- name: Install createCRDB script
   ansible.builtin.template:
-    src: create_postgres_user.j2
-    dest: create_postgres_user.sql
-    owner: "{{ login_username }}"
-    group: "{{ login_username }}"
-    mode: '0755'
+    src: createCRDB.j2
+    dest: /tmp/createCRDB.sh
+    mode: '0750'
 
-- name: create postgres user shell script
-  ansible.builtin.template:
-    src: create_postgres_sh.j2
-    dest: create_postgres_user.sh
-    owner: "{{ login_username }}"
-    group: "{{ login_username }}"
-    mode: '0755'
-  vars:
-    cockroach_path: "{{ cockroach_bin.stdout | trim }}"
-
-- name: Discover cockroach binary path
-  shell: command -v cockroach || echo /usr/local/bin/cockroach
-  register: cockroach_bin
-  changed_when: false
-  check_mode: no
-
-- name: run create_postgres_user script
-  ansible.builtin.command: bash ./create_postgres_user.sh
+# Prefer shell for multi-line / env usage
+- name: Run createCRDB script
+  ansible.builtin.shell: /tmp/createCRDB.sh
   args:
-    chdir: /home/{{ login_username }}
+    executable: /bin/bash
   environment:
-    PATH: "/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin"
+    PATH: "/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin"
+  no_log: true   # hides URL/password from logs
 
-- name: create employee database if not exists for cockroach
-  command: "{{ lookup('template','createCRDB.j2') }}"

@@ -1,10 +1,30 @@
-- name: save environment script
-  copy:
-    content: "{{ lookup('template','setEnv.j2') }}"
+# tasks/package-java-app.yml
+
+- name: Save environment script for the app
+  ansible.builtin.template:
+    src: setEnv.j2
     dest: "{{ crdb_file_location }}/Digital-Banking-CockroachDB/scripts/setEnv.sh"
+    owner: "{{ login_username }}"
+    group: "{{ login_username }}"
     mode: '0755'
 
-- name: compile application
-  shell:
-    cmd: mvn clean package
+# Use a login-ish shell so /etc/profile (and /etc/profile.d/*.sh) are loaded.
+# Explicitly source profile files to be robust across distros/non-interactive shells.
+- name: Compile application with Maven
+  become: true
+  become_user: "{{ login_username }}"
+  ansible.builtin.shell: |
+    set -eo pipefail
+    # Only source our known-good profiles
+    [ -r /etc/profile.d/jdk17.sh ] && . /etc/profile.d/jdk17.sh
+    [ -r /etc/profile.d/maven.sh ] && . /etc/profile.d/maven.sh
+
+    echo "JAVA_HOME=${JAVA_HOME:-unset}"
+    java -version
+    mvn -version
+
+    mvn -B clean package
+  args:
     chdir: "{{ crdb_file_location }}/Digital-Banking-CockroachDB"
+    executable: /bin/bash
+

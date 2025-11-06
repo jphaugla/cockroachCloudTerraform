@@ -1,6 +1,19 @@
-# ignore errors because get an error if running this second time after updating scripts/setEnv.sh
-- name: Install git
+# tasks/install-git.yml
+# Debian/Ubuntu
+- name: Install git (Debian/Ubuntu)
   become: yes
-  yum:
+  ansible.builtin.apt:
     name: git
-    state: latest
+    state: present
+    update_cache: yes
+  when: is_debian
+
+# RHEL/CentOS/Fedora/Amazon
+- name: Install git (RHEL/CentOS/Fedora/Amazon)
+  become: yes
+  ansible.builtin.dnf:
+    name: git
+    state: present
+    use_backend: "{{ dnf_backend }}"
+  when: is_rpm
+

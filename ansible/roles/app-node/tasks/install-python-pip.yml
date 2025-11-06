@@ -1,12 +1,39 @@
-- name: Install python3 pip
+# tasks/install-python-pip.yml
+# Debian/Ubuntu
+- name: Install Python & pip (Debian/Ubuntu)
   become: yes
-  yum:
-    name: 
+  ansible.builtin.apt:
+    name:
       - python3
       - python3-pip
-    state: latest
+      - python3-venv
+    state: present
+    update_cache: yes
+  when: ansible_facts.pkg_mgr == 'apt'
 
+# RHEL/CentOS/Fedora/Amazon
+- name: Set DNF backend (dnf5 on Amazon Linux 2023, else auto)
+  ansible.builtin.set_fact:
+    _dnf_backend: >-
+      {{ 'dnf5'
+         if (ansible_facts.distribution == 'Amazon'
+             and (ansible_facts.distribution_major_version | string) is match('^2023$'))
+         else 'auto' }}
+  when: ansible_facts.pkg_mgr in ['yum', 'dnf']
+
+- name: Install Python & pip (RHEL/CentOS/Fedora/Amazon)
+  become: yes
+  ansible.builtin.dnf:
+    name:
+      - python3
+      - python3-pip
+    state: present
+    use_backend: "{{ _dnf_backend | default('auto') }}"
+  when: ansible_facts.pkg_mgr in ['yum', 'dnf']
+
+# Virtualenv on all distros (after pip3 exists)
 - name: Ensure virtualenv is installed
-  pip:
+  become: yes
+  ansible.builtin.pip:
     name: virtualenv
     executable: pip3

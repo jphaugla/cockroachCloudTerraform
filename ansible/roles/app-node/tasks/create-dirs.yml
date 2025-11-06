@@ -1,3 +1,14 @@
+# tasks/create-dirs.yml
+- name: Normalize distro facts
+  ansible.builtin.set_fact:
+    is_debian: "{{ ansible_facts.pkg_mgr == 'apt' }}"
+    is_rpm: "{{ ansible_facts.pkg_mgr in ['yum','dnf'] }}"
+    is_amazon_linux: "{{ ansible_facts.distribution == 'Amazon' }}"
+
+- name: Compute DNF backend
+  ansible.builtin.set_fact:
+    dnf_backend: "{{ 'dnf5' if is_amazon_linux | bool else 'auto' }}"
+
 - name: make log replicator directory
   become: yes
   file: 

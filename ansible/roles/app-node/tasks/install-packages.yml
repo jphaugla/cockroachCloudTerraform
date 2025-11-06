@@ -1,19 +1,38 @@
+# tasks/install-packages.yml
 # Installing and Configuring packages
-- name: Install packages
+# Debian/Ubuntu
+- name: Install build/dev packages (Debian/Ubuntu)
   become: yes
-  yum:
-    state: latest
+  ansible.builtin.apt:
+    name:
+      - build-essential
+      - libpq-dev
+      - python3-dev
+      - postgresql-server-dev-all
+    state: present
+    update_cache: yes
+  when: is_debian
+
+# RHEL/CentOS/Fedora/Amazon
+- name: Install build/dev packages (RHEL/CentOS/Fedora/Amazon)
+  become: yes
+  ansible.builtin.dnf:
     name:
       - gcc
       - gcc-c++
       - libpq-devel
       - python3-devel
       - postgresql-devel
+    state: present
+    use_backend: "{{ dnf_backend }}"
+  when: is_rpm
 
 - name: Install sqlalchemy and psycopg2
   become: yes
-  pip:
+  ansible.builtin.pip:
     name:
-      - sqlalchemy~=1.4
+      - "sqlalchemy~=1.4"
       - sqlalchemy-cockroachdb
       - psycopg2
+    executable: pip3
+

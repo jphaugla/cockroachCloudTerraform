@@ -1,3 +1,4 @@
+# tasks/system-locations.yml
 - name: Debug OS information
   become: yes
   debug:
@@ -5,25 +6,11 @@
       The operating system is {{ ansible_facts['distribution'] }}
       and the version is {{ ansible_facts['distribution_version'] }}
 
-- name: Set variable if Amazon Linux
-  set_fact:
-    is_amazon_linux: "{{ ansible_facts['distribution'] == 'Amazon' }}"
-
-- name: copy create when is amazon system_locations.sql 
+- name: copy system_locations.sql from appropriate cloud provider
   copy:
-    src: azure_system_locations.sql
+    src: "{{ cloud_provider }}_system_locations.sql"
     dest: "/home/{{ login_username }}/system_locations.sql"
     mode: '0644'
-  when:
-    - not is_amazon_linux|bool
-
-- name: copy create when is not amazon system_locations.sql 
-  copy:
-    src: aws_system_locations.sql
-    dest: "/home/{{ login_username }}/system_locations.sql"
-    mode: '0644'
-  when:
-    - is_amazon_linux|bool
 
 - name: Discover cockroach binary path
   shell: command -v cockroach || echo /usr/local/bin/cockroach

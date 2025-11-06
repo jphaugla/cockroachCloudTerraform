@@ -42,6 +42,7 @@ ansible-playbook \
   -e "owner=${var.owner}" \
   -e "cockroach_server=${var.cockroach_server}" \
   -e "crdb_cloud_url=${local.crdb_cloud_url}" \
+  -e "cloud_provider="azure" \
   -e "deploy_event_hub=${var.deploy_event_hub}" \
   -e "deploy_azure_sql=${var.deploy_azure_sql}" \
   -e "bucket_name=${local.bucket_name}" 

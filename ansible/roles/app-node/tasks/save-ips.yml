@@ -1,3 +1,4 @@
+# tasks/save-ips.yml
 - name: Get the IPs
   set_fact:
     ip_ext_node: "{{ inventory_hostname }}"

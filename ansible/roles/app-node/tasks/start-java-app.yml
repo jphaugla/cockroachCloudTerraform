@@ -1,3 +1,4 @@
+# tasks/start-java-app.yml
 - name: run application
   shell: 
     cmd: "( nohup  ./runApp.sh </dev/null > {{ crdb_file_location }}/{{ login_username }}/logs/bank-app/app.log 2>&1  & )"

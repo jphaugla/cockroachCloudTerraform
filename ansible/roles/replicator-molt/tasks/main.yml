@@ -11,11 +11,6 @@
   when:
     - install_postgres|bool
 
-- name: start postgres
-  include_tasks: start-postgres.yml
-  when:
-    - start_postgres|bool
-
 - name: add employee sample database
   include_tasks: install-employee-sample.yml
   when:
