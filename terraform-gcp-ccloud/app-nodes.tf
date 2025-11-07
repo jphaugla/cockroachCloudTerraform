@@ -29,7 +29,6 @@ provider "google" {
 module "crdb-region-0" {
   count               = local.region_count > 0 ? 1 : 0
   source              = "../terraform-gcp-app"
-  enable_private_dns  = var.enable_private_dns
   enable_privatelink  = var.enable_privatelink
   use_trusted_owners  = var.use_trusted_owners
   gcp_credentials_file = var.gcp_credentials_file
@@ -92,7 +91,6 @@ module "crdb-region-0" {
 module "crdb-region-1" {
   count               = local.region_count > 1 ? 1 : 0
   source              = "../terraform-gcp-app"
-  enable_private_dns  = var.enable_private_dns
   enable_privatelink  = var.enable_privatelink
   use_trusted_owners  = var.use_trusted_owners
   gcp_credentials_file = var.gcp_credentials_file
@@ -149,7 +147,6 @@ module "crdb-region-1" {
 module "crdb-region-2" {
   count               = local.region_count > 2 ? 1 : 0
   source              = "../terraform-gcp-app"
-  enable_private_dns  = var.enable_private_dns
   enable_privatelink  = var.enable_privatelink
   use_trusted_owners  = var.use_trusted_owners
   gcp_credentials_file = var.gcp_credentials_file

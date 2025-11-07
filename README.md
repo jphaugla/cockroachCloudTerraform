@@ -34,14 +34,16 @@ This repository contains Terraform/Ansible configurations to provision and manag
     - `cockroach_private_endpoint_trusted_owner`
     - `cockroach_private_endpoint_connection`
   - **cluster.tf**: CockroachDB cluster, allow‑list entries, and SQL user creation.
+  - **tls.tf**: building of tls certificate
   - **outputs.tf**: Exposes useful values such as `crdb_sql_dns` and application connection strings.
 
 ## Prerequisites
 
 1. **Terraform**: v1.5+ installed.
-2. Depending on AWS or azure, set the environment
-   - **AWS credentials**: Configure via environment variables, SSO, or `~/.aws/credentials`.
-   - **Azure credentials**: az login
+2. Depending on AWS, gcp or azure, set the environment
+   - **AWS credentials**: Configure via environment variables, SSO, or `~/.aws/credentials`.  Is transparent to the terraform/ansible.
+   - **Azure credentials**: az login  Is transparent to the terraform/ansible.
+   - **GCP credentials**:  main.tf has a variable, gcp_credentials_file, holding the full path to the gcp credentials file
 3. **Cockroach Cloud API TOKEN** and **COCKROACH_SERVER**
 ```bash
 export COCKROACH_API_TOKEN=CCDB1_BLAHkjC2MBLAHXGZ6SyyYc_BLAHULj7mwmBLAHz3I84svqdBLAHchx33InBLAH
@@ -50,7 +52,7 @@ export COCKROACH_SERVER="https://cockroachlabs.cloud"
 export TF_VAR_cockroach_server="${COCKROACH_SERVER}"
 ```
 4. Know the IP address of the machine running the terraform so the ansible can connect using ssh and so the workstation has access to cloud ui and such.  [https://ifconfig.co}(https://ifconfig.co) will get workstation address
-5. Must pre-create the ssh keys, download the keys  and reference them correctly 
+5. Must pre-create the ssh keys, download the keys  and reference them correctly  
 
 ## Quick Start for AWS single or multi-region.  
 NOTES: 
@@ -111,6 +113,51 @@ This name resolves over AWS PrivateLink once the VPC endpoint’s private DNS is
 export DATABASE_URL="postgresql://<user>:<pass>@$(terraform output -raw crdb_sql_dns):26257/defaultdb?sslmode=verify-full&sslrootcert=/home/ec2-user/certs/ca.crt"
 cockroach sql --url="$DATABASE_URL"
 ```
+## Quick Start for GCP single 
+NOTES: 
+- control file is terraform-gcp-ccloud/gcp-single/main.tf 
+       because of the private links in the terraform, an extra apply is needed
+1. **change to correct directory**
+   ```bash
+   cd terraform-gcp-ccloud/gcp-single
+   ```
+2. **set enable_privatelink to false**
+- edit main.tf to set enable_privatelink = false
+- edit the gcp_private_key_list and the gcp_credentials_file
+- set all the other parameters for the deployment in main.tf
+- ensure the COCKROACH_API_TOKEN and TF_VAR_cockroach_api_token environment variables are set
+- ensure the COCKROACH_SERVER and TF_VAR_cockroach_server environment variables are set
+- determine if trusted owners are used in the cloud environment and set "use_trusted_owners" appropriately
+- byoc is not tested yet for gcp
+
+3. **Initialize Terraform**
+   ```bash
+   terraform init
+   ```
+4. **Apply**
+   ```bash
+   terraform apply -auto-approve 
+   ```
+5. **accept the connection in cockroach cloud network**
+In the cockroach cloud UI go to the Networking->Private endpoint page
+Click on the actions dots and select "Finish setup"
+
+6. **set enable_privatelink to true**
+edit main.tf to set enable_privatelink = true
+
+7. **retrieve the GCP account id as an environment variable as it is needed for the privatelink definition**
+Can use the api call getCLusters.sh to retrieve the GCP Account name.  The field value in the output from getCluseters.sh is account_id.  Use this account_id and define two environment variable:  
+- GCP_ACCOUNT_ID=crl-prod-xyz123
+- TFVAR_gcp_account_id=${GCP_ACCOUNT_ID}
+
+8. **repeat step 3**
+
+### Obtain PrivateLink DNS
+
+### Connect From Application Node
+
+- This is taken care of in a script placed in the application node at:  **/home/ubuntu/sql.sh**
+
 ## Quick Start for Azure
 NOTES:
 - Unlike AWS, the cluster creation and the application server creation are two completely separate terraform processes

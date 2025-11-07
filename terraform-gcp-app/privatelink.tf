@@ -8,8 +8,7 @@
 #   allow_psc_global_access       (bool)
 #   crdb_cluster_id               (string)   # CockroachDB Cloud cluster ID
 #   psc_producer_project_id       (string)   # Cockroach producer project (your gcp_account_id from CRDB API)
-#   enable_private_dns            (bool)
-#   crdb_private_endpoint_dns     (string)   # e.g. "db.internal" (optional; used when enable_private_dns = true)
+#   crdb_private_endpoint_dns     (string)   # e.g. "db.internal" (optional; used when enable_privatelink = true)
 #
 # Required existing resources:
 #   google_compute_network.main
@@ -92,11 +91,13 @@ resource "google_compute_forwarding_rule" "crdb_psc" {
 # Use for_each driven purely by variables so Terraform can always decide at plan time.
 # We key the map as "zone" so we can reference it deterministically later.
 locals {
-  _dns_enabled = var.enable_privatelink && var.enable_private_dns 
+  # NEW: enable DNS when a non-empty name is provided
+  _dns_name    = trimspace(var.crdb_private_endpoint_dns)
+  _dns_enabled = var.enable_privatelink && length(local._dns_name) > 0
 }
 
 resource "google_dns_managed_zone" "crdb_private_zone" {
-  for_each = local._dns_enabled ? { zone = trimspace(var.crdb_private_endpoint_dns) } : {}
+  for_each = local._dns_enabled ? { zone = local._dns_name } : {}
 
   name       = replace("${var.project_id}-${var.virtual_network_location}-crdb-priv-zone", "_", "-")
   dns_name   = endswith(each.value, ".") ? each.value : "${each.value}."
@@ -108,9 +109,7 @@ resource "google_dns_managed_zone" "crdb_private_zone" {
 }
 
 resource "google_dns_record_set" "crdb_private_a" {
-  # Mirror the same condition; re-build the same key so both resources exist together.
-  for_each = local._dns_enabled ? { zone = trimspace(var.crdb_private_endpoint_dns) } : {}
-
+  for_each     = local._dns_enabled ? { zone = local._dns_name } : {}
   name         = endswith(each.value, ".") ? each.value : "${each.value}."
   type         = "A"
   ttl          = 300

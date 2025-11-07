@@ -182,11 +182,6 @@ variable "crdb_service_name" {
       type        = string
       default     = "25.3.2"
     }
-    variable "enable_private_dns" {
-      description = "Whether to turn on GCP PrivateLink Private DNS"
-      type        = bool
-      default     = false
-    }
     variable "enable_privatelink" {
       description = "enable privatelink deployment"
       type        = bool

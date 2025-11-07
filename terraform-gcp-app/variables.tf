@@ -429,12 +429,6 @@ variable "sql_user_password" {
   type        = string
 }
 
-variable "enable_private_dns" {
-  description = "Whether to turn on AWS PrivateLink Private DNS"
-  type        = bool
-  default     = false
-}
-
 variable "enable_privatelink" {
   description = "Whether to enable privatelink"
   type        = bool
