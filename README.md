@@ -268,11 +268,12 @@ export SA_ID=4f955377-blah-400b-blah-blah146fblah
 Before destroy, drop the sql  user name that is created (example is jhaugland).  Without dropping the user, the destroy cluster will fail.
 
 ```bash
-drop owned by jhaugland;
 DROP DATABASE IF EXISTS ecommerce CASCADE;
 DROP DATABASE IF EXISTS employees CASCADE;
 DROP DATABASE IF EXISTS kv CASCADE;
+use system;
 DROP DATABASE IF EXISTS defaultdb CASCADE;
+drop owned by jhaugland;
 drop user jhaugland;
 ```
 check for any other databases by doing *SHOW DATABASES*.   drop any of those databases if owned by jhaugland
