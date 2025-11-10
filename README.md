@@ -193,11 +193,11 @@ NOTE:  When this terraform apply is complete, there is a cockroach cloud instanc
    ```bash
    cd terraform-azure-app/app-only
    ```
-   * *Initialize Terraform*
+   * Initialize Terraform
    ```bash
    terraform init
    ```
-   * *Apply*
+   * Apply
    ```bash
    terraform apply -auto-approve 
    ```
@@ -222,11 +222,11 @@ NOTE:  When this terraform apply is complete, there is a application server, kaf
     * ensure the COCKROACH_API_TOKEN environment variable is set
     * important:  **set enable_private_dns to true**
     * ensure crdb_private_endpoint_dns environment variable is set for this deployment
-    * *Initialize Terraform*
+    * Initialize Terraform
    ```bash
    terraform init
    ```
-    * *Apply*
+    * Apply
    ```bash
    terraform apply -auto-approve 
    ```
