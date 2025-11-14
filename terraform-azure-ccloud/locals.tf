@@ -15,12 +15,9 @@ locals {
   tags           = merge(var.resource_tags, local.required_tags)
   admin_username = "adminuser"
 
-  crdb_private_endpoint_dns_list = [
-    for r in cockroach_cluster.advanced.regions : r.internal_dns
-  ]
-  crdb_public_endpoint_dns_list = [
-    for r in cockroach_cluster.advanced.regions : r.sql_dns
-  ]
+  crdb_private_endpoint_dns_list = var.create_cluster ?  [for r in cockroach_cluster.advanced[0].regions : r.private_endpoint_dns] : var.existing_crdb_private_endpoint_dns_list
+  crdb_public_endpoint_dns_list = var.create_cluster ?  [for r in cockroach_cluster.advanced[0].regions : r.sql_dns] : var.existing_crdb_public_endpoint_dns_list
   region_count = length(local.crdb_private_endpoint_dns_list)
+  cluster_name = "${var.owner}-${var.project_name}-adv-azure"
 }
 

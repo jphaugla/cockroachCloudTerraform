@@ -29,6 +29,5 @@
   ansible.builtin.dnf:
     name: sysbench
     state: present
-    use_backend: "{{ dnf_backend }}"
   when: is_rpm
 

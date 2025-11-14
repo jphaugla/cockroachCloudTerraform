@@ -23,7 +23,7 @@
       - "{{ 'java-17-amazon-corretto-devel' if is_amazon_linux else 'java-17-openjdk-devel' }}"
       - golang
     state: present
-    use_backend: "{{ dnf_backend }}"
+    disablerepo: "pgdg*"
   when: is_rpm
 
 # Detect JAVA_HOME dynamically

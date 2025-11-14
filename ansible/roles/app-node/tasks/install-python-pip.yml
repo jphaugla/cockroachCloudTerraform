@@ -1,39 +1,56 @@
-# tasks/install-python-pip.yml
+# tasks/install-packages.yml
+# Installing and Configuring packages
+
 # Debian/Ubuntu
-- name: Install Python & pip (Debian/Ubuntu)
+- name: Install build/dev packages (Debian/Ubuntu)
   become: yes
   ansible.builtin.apt:
     name:
-      - python3
-      - python3-pip
-      - python3-venv
+      - build-essential
+      - libpq-dev
+      - python3-dev
+      - postgresql-server-dev-all
     state: present
     update_cache: yes
-  when: ansible_facts.pkg_mgr == 'apt'
+  when: is_debian
 
-# RHEL/CentOS/Fedora/Amazon
-- name: Set DNF backend (dnf5 on Amazon Linux 2023, else auto)
-  ansible.builtin.set_fact:
-    _dnf_backend: >-
-      {{ 'dnf5'
-         if (ansible_facts.distribution == 'Amazon'
-             and (ansible_facts.distribution_major_version | string) is match('^2023$'))
-         else 'auto' }}
-  when: ansible_facts.pkg_mgr in ['yum', 'dnf']
+# Refresh cache but skip PGDG repos to avoid pgdg18 metadata failures
+- name: Refresh DNF cache (without PGDG)
+  become: yes
+  ansible.builtin.dnf:
+    update_cache: yes
+    disablerepo: "pgdg*"
+  when: is_rpm
 
-- name: Install Python & pip (RHEL/CentOS/Fedora/Amazon)
+# Enable CRB (Rocky/Alma/Fedora) or ignore if not present (RHEL/Amazon)
+- name: Enable CRB/Codeready Builder (best effort)
+  become: yes
+  ansible.builtin.command: dnf config-manager --set-enabled crb
+  changed_when: false
+  failed_when: false
+  when: is_rpm
+
+# RHEL/CentOS/Fedora/Amazon — install without PGDG repos
+- name: Install build/dev packages (RHEL/CentOS/Fedora/Amazon)
   become: yes
   ansible.builtin.dnf:
     name:
-      - python3
-      - python3-pip
+      - gcc
+      - gcc-c++
+      - libpq-devel
+      - python3-devel
+      - postgresql-devel
     state: present
-    use_backend: "{{ _dnf_backend | default('auto') }}"
-  when: ansible_facts.pkg_mgr in ['yum', 'dnf']
+    use_backend: "{{ _dnf_backend_pkgs | default('auto') }}"
+    disablerepo: "pgdg*"
+  when: is_rpm
 
-# Virtualenv on all distros (after pip3 exists)
-- name: Ensure virtualenv is installed
+# Python DB drivers
+- name: Install sqlalchemy and psycopg2
   become: yes
   ansible.builtin.pip:
-    name: virtualenv
+    name:
+      - "sqlalchemy~=1.4"
+      - sqlalchemy-cockroachdb
+      - psycopg2
     executable: pip3

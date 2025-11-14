@@ -3,7 +3,7 @@ terraform {
   required_providers {
     cockroach = {
       source  = "cockroachdb/cockroach"
-      version = ">= 1.12.2"
+      version = ">= 1.15.1"
     }
     azurerm   = {
       source  = "hashicorp/azurerm"
@@ -22,8 +22,4 @@ terraform {
       version = ">= 3.5.0"
     }
   }
-}
-
-provider "azurerm" {
-  features {}
 }

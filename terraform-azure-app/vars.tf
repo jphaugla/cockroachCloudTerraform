@@ -59,16 +59,18 @@
 # ----------------------------------------
 # Existing Key Info
 # ----------------------------------------
-    variable "ssh_key_name" {
-      description = "The name of an existing ssh key "
-      type    = string      
-    }
     variable "ssh_key_resource_group" {
       description = "The name of the resource group containing the existing SSH Key"
       type        = string
     }
+
     variable "ssh_private_key" {
       description = "The full path of the private key"
+      type        = string
+    }
+
+    variable "ssh_key_name" {
+      description = "The name of the private key"
       type        = string
     }
 
@@ -514,9 +516,15 @@ variable "crdb_cluster_cert" {
 }
 
 variable "enable_private_dns" {
-  description = "Whether to turn on AWS PrivateLink Private DNS"
+  description = "Whether to turn on PrivateLink Private DNS"
   type        = bool
   default     = false
+}
+
+variable "pe_subnet_index" {
+  description = "Index into azurerm_subnet.private[*] where the Private Endpoint will be placed."
+  type        = number
+  default     = 0
 }
 
 variable "project_name" {
@@ -589,4 +597,10 @@ variable "event_hub_name" {
   description = "Event Hub name"
   type        = string
   default     = "app-events"
+}
+
+variable "use_trusted_owners" {
+  description = "use trusted owners on this cockroachdb account"
+  type        = bool
+  default     = false
 }

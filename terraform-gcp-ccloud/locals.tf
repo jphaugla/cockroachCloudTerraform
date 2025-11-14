@@ -13,7 +13,6 @@ locals {
   }
 
   tags           = merge(var.resource_tags, local.required_tags)
-  admin_username = "ec2-user"
 
   # Endpoints: from created resource OR from inputs when importing
   # For GCP PSC: use cluster-level private_endpoint_dns

@@ -1,0 +1,6 @@
+---
+- name: Restart PostgreSQL 15
+  become: yes
+  ansible.builtin.systemd:
+    name: postgresql-15
+    state: restarted

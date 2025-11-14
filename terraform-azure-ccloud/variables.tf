@@ -39,6 +39,11 @@ variable "delete_protection" {
   default     = true
 }
  
+variable "vpc_cidr_list" {
+  description = "A list of IP CIDR ranges to allow as clients." 
+  type        = list(string)
+} 
+
 variable "netskope_ips" {
   description = "A list of IP CIDR ranges to allow as clients. The IPs listed below are Netskope IP Ranges"
   type        = list(string)
@@ -55,6 +60,21 @@ variable "my_ip_address" {
   description = "Your single client IP address to allow"
   type        = string
   default     = "174.141.204.193"
+}
+
+variable "ssh_key_resource_group" {
+  description = "The name of the resource group containing the existing SSH Key"
+  type        = string
+}
+
+variable "ssh_private_key" {
+  description = "The full path of the private key"
+  type        = string
+}
+
+variable "ssh_key_name" {
+  description = "The name of the private key"
+  type        = string
 }
 
 variable "sql_user_name" {
@@ -104,8 +124,6 @@ variable "crdb_service_name" {
 variable "cockroach_api_token" {
   description = "Cockroach Cloud API token (picks up from TF_VAR_cockroach_api_token)"
   type        = string
-  sensitive   = true
-  default     = ""
 }
 variable "cockroach_server" {
   description = "Cockroach Cloud API server for the URL(picks up from TF_VAR_cockroach_server)"
@@ -128,8 +146,75 @@ variable "use_trusted_owners" {
   default     = false
 }
 
+variable "enable_private_dns" {
+  description = "Whether to turn on PrivateLink Private DNS"
+  type        = bool
+  default     = false
+}
+# when importing, you must also supply the per-region endpoints
+variable "existing_crdb_private_endpoint_dns_list" {
+  description = "Per-region INTERNAL DNS names (one per region) when create_cluster = false"
+  type        = list(string)
+  default     = []
+}
+
+variable "existing_crdb_public_endpoint_dns_list" {
+  description = "Per-region PUBLIC SQL DNS names (one per region) when create_cluster = false"
+  type        = list(string)
+  default     = []
+}
+
 variable "byoc_enabled" {
   description = "Enable BYOC; include a customer_cloud_account.aws block"
   type        = bool
   default     = false
+}
+
+variable "app_vm_size" {
+  description = "The Azure instance type for the crdb instances app Instance"
+  type        = string
+}
+
+variable "include_kafka" {
+  description = "'yes' or 'no' to include a Kafka instance"
+  type        = string
+  default     = "yes"
+  validation {
+    condition = contains(["yes", "no"], var.include_kafka)
+    error_message = "Valid value for variable 'include_kafka' is : 'yes' or 'no'"
+  }
+}
+
+variable "kafka_instance_type" {
+  description = "The Azure instance type for the crdb instances Kafka"
+  type        = string
+  default     = "t3a.small"
+}
+ # When create_cluster = false, this must be set to the ID of your existing cluster
+variable "existing_crdb_cluster_id" {
+  description = "ID of an already‐provisioned CockroachDB Cloud cluster to manage."
+  type        = string
+  default     = ""
+}
+
+variable "create_cluster" {
+  description = "If false, Terraform will not create a CockroachDB Cloud cluster but will import an existing one."
+  type        = bool
+  default     = true
+}
+variable "crdb_cluster_cert" {
+  description = "PEM-encoded cluster CA cert (used when create_cluster = false)"
+  type        = string
+  default     = ""
+}
+
+variable "run_ansible" {
+   description = "run the ansible"
+   type        = bool
+   default     = true
+}
+variable "crdb_version" {
+  description = "CockroachDB Version"
+  type        = string
+  default     = "25.3.2"
 }

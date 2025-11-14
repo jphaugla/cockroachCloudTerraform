@@ -14,12 +14,16 @@ resource "null_resource" "provision" {
   provisioner "local-exec" {
     working_dir = var.playbook_working_directory
 
+    # NOTE:
+    #  - ${var.ansible_verbosity_switch} is placed BEFORE the playbook and can be empty safely.
+    #  - pathexpand() ensures "~" expands for --private-key.
     command = <<EOT
 ansible-playbook \
+  ${var.ansible_verbosity_switch} \
   -u "${var.login_username}" \
   -i "${var.playbook_instances_inventory_file}" \
-  --private-key "${var.ssh_private_key}" \
-  playbook.yml "${var.ansible_verbosity_switch}" \
+  --private-key ${pathexpand(var.ssh_private_key)} \
+  playbook.yml \
   -e "db_admin_user=${var.sql_user_name}" \
   -e "db_admin_password=${var.sql_user_password}" \
   -e "region=${var.virtual_network_location}" \
@@ -31,7 +35,6 @@ ansible-playbook \
   -e include_kafka=${var.include_kafka} \
   -e kafka_internal_ip=${local.kafka_private_ip} \
   -e kafka_username=adminuser \
-  -e "setup_migration=${var.setup_migration}" \
   -e "login_username=${var.login_username}" \
   -e "include_app=${var.include_app}" \
   -e "resource_group=${local.resource_group_name}" \
@@ -42,10 +45,10 @@ ansible-playbook \
   -e "owner=${var.owner}" \
   -e "cockroach_server=${var.cockroach_server}" \
   -e "crdb_cloud_url=${local.crdb_cloud_url}" \
-  -e "cloud_provider="azure" \
+  -e "cloud_provider=azure" \
   -e "deploy_event_hub=${var.deploy_event_hub}" \
   -e "deploy_azure_sql=${var.deploy_azure_sql}" \
-  -e "bucket_name=${local.bucket_name}" 
+  -e "bucket_name=${local.bucket_name}"
 EOT
   }
 

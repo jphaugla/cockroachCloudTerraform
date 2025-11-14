@@ -11,6 +11,7 @@
       - postgresql-server-dev-all
     state: present
     update_cache: yes
+    disablerepo: "pgdg*"
   when: is_debian
 
 # RHEL/CentOS/Fedora/Amazon
@@ -24,7 +25,7 @@
       - python3-devel
       - postgresql-devel
     state: present
-    use_backend: "{{ dnf_backend }}"
+    disablerepo: "pgdg*"
   when: is_rpm
 
 - name: Install sqlalchemy and psycopg2

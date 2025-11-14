@@ -1,33 +1,67 @@
 ---
-# RHEL / CentOS / Alma / Rocky
+# tasks/install-postgres-rhel.yml
+# For RHEL/CentOS/Rocky/Alma (EL8/EL9)
 
-- name: Install PGDG RPM
+- name: Ensure we’re on a RHEL-like distro
+  ansible.builtin.assert:
+    that: ansible_facts.os_family == "RedHat"
+    fail_msg: "This task file is for RHEL/CentOS/Rocky/Alma only."
+
+# EL8/EL9 ship a module stream that conflicts with PGDG. Disable it first.
+- name: Disable built-in PostgreSQL module (EL8/EL9)
   become: yes
-  ansible.builtin.shell: |
-    dnf install -y https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm
-  register: pgdg_install
-  retries: 3
-  delay: 5
-  until: pgdg_install.rc == 0
+  ansible.builtin.command: dnf -qy module disable postgresql
+  register: disable_mod
+  failed_when: false          # don’t fail if already disabled / not applicable
+  changed_when: disable_mod.rc == 0
+  when: ansible_facts.os_family == "RedHat"
 
+# Install the PGDG repository RPM (EL9 URL shown; idempotent)
+- name: Install PGDG repo RPM
+  become: yes
+  ansible.builtin.dnf:
+    name: "https://download.postgresql.org/pub/repos/yum/reporpms/EL-9-x86_64/pgdg-redhat-repo-latest.noarch.rpm"
+    state: present
+    disablerepo: "pgdg*"
+
+# Disable stray PGDG repos so cache refresh won’t trip on pgdg18 mirrors
+- name: Disable unneeded PGDG repos (keep pgdg15 only)
+  become: yes
+  ansible.builtin.ini_file:
+    path: /etc/yum.repos.d/pgdg-redhat-all.repo
+    section: "{{ item }}"
+    option: enabled
+    value: '0'
+  loop:
+    - pgdg16
+    - pgdg17
+    - pgdg18
+  ignore_errors: yes
+
+# Refresh DNF metadata now that only the required repo is enabled
 - name: Refresh DNF cache
   become: yes
   ansible.builtin.dnf:
     update_cache: yes
 
-- name: Install postgresql-server (RHEL/CentOS)
+# Install PostgreSQL 15 server from the PGDG repo
+- name: Install postgresql15-server (from pgdg15)
   become: yes
   ansible.builtin.dnf:
     name: postgresql15-server
     state: present
+    enablerepo: pgdg15
 
-- name: Initialize PostgreSQL database (RHEL/CentOS)
+# Initialize the database if not already initialized
+- name: Initialize PostgreSQL database (EL)
   become: yes
-  ansible.builtin.shell:
+  ansible.builtin.command:
     cmd: /usr/pgsql-15/bin/postgresql-15-setup initdb
+  args:
     creates: /var/lib/pgsql/15/data/postgresql.conf
 
-- name: Copy pg_hba.conf (RHEL/CentOS)
+# Provide your pg_hba.conf
+- name: Copy pg_hba.conf
   become: yes
   ansible.builtin.copy:
     src: pg_hba.conf
@@ -35,29 +69,33 @@
     owner: postgres
     group: postgres
     mode: '0600'
+  notify: Restart PostgreSQL 15
 
-- name: Start & enable PostgreSQL (RHEL/CentOS)
+# Replication tuning
+- name: Configure PostgreSQL replication settings
+  become: yes
+  ansible.builtin.blockinfile:
+    path: /var/lib/pgsql/15/data/postgresql.conf
+    marker: "# {mark} ANSIBLE MANAGED POSTGRES REPLICATION CONFIG"
+    block: |
+      wal_level = logical
+      max_wal_senders = 3
+      max_replication_slots = 3
+      wal_keep_size = 1024
+      hot_standby = on
+  notify: Restart PostgreSQL 15
+
+# Start & enable service
+- name: Start and enable PostgreSQL 15
   become: yes
   ansible.builtin.systemd:
     name: postgresql-15
     state: started
     enabled: yes
 
-- name: Install psycopg2-binary (RHEL/CentOS)
+# psycopg2 for your Python tooling
+- name: Install psycopg2-binary
   become: yes
   ansible.builtin.pip:
     name: psycopg2-binary
     executable: pip3
-
-- name: Configure PostgreSQL replication settings (RHEL/CentOS/Alma/Rocky)
-  become: yes
-  ansible.builtin.blockinfile:
-    path: /var/lib/pgsql/15/data/postgresql.conf
-    marker: "# {mark} ANSIBLE MANAGED POSTGRES REPLICATION CONFIG"
-    block: |
-      # Replication settings
-      wal_level = logical
-      max_wal_senders = 3
-      max_replication_slots = 3
-      wal_keep_size = 1024
-      hot_standby = on

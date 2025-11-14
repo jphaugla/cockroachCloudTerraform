@@ -15,6 +15,6 @@ resource "local_file" "instances_file" {
         })
 
     depends_on = [
-         azurerm_public_ip.app-ip
+         azurerm_public_ip.app_ip
     ]
 }

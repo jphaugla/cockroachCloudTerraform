@@ -15,10 +15,6 @@ resource "azurerm_subnet" "private" {
   resource_group_name  = local.resource_group_name
   virtual_network_name = azurerm_virtual_network.vm01.name
   address_prefixes     = [ local.private_subnet_list[count.index] ]
-  lifecycle {
-    # ignore ANY drift on this subnet so TF never tries to touch the policy
-    ignore_changes = all
-  }
 }
 
 # 3) Public subnets

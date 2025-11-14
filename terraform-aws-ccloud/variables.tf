@@ -39,6 +39,12 @@ variable "delete_protection" {
   default     = true
 }
  
+variable "enable_advanced_security" {
+  type        = bool
+  description = "If true, create a CockroachDB Advanced cluster with the advanced security feature set (PCI/HIPAA readiness). Only honored at cluster creation."
+  default     = false
+}
+
 variable "netskope_ips" {
   description = "A list of IP CIDR ranges to allow as clients. The IPs listed below are Netskope IP Ranges"
   type        = list(string)

@@ -35,7 +35,7 @@ ansible-playbook \
   -e "login_username=${local.admin_username}" \
   -e "cockroach_server=${var.cockroach_server}" \
   -e "crdb_cloud_url=${local.crdb_cloud_url}" \
-  -e "cloud_provider="aws" \
+  -e "cloud_provider=aws" \
   -e "bucket_name=${local.bucket_name}" \
   -e "include_app=${var.include_app}"
 EOT

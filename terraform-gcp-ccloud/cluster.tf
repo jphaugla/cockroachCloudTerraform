@@ -1,4 +1,4 @@
-# cluster.tf
+# terraform-gcp-ccloud/cluster.tf
 # Look up folder only when we create
 data "cockroach_folder" "target" {
   count = var.create_cluster ? 1 : 0
