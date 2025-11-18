@@ -8,7 +8,7 @@ locals {
   }
 
   admin_username = "ec2-user"
-  bucket_name = "${var.owner}-${var.project_name}-${var.aws_region}-molt-bucket"
+  bucket_name = "${var.owner}-${var.project_name}-${var.aws_region}-for-molt-bucket"
   # create 6 subnets: 3 for public subnets, 3 for private subnets
   subnet_list         = cidrsubnets(var.cidr, 3, 3, 3, 3, 3, 3)
   private_subnet_list = chunklist(local.subnet_list, 3)[0]
