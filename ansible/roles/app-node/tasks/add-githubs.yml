@@ -23,4 +23,7 @@
     - { repo: "https://github.com/jphaugla/costCalculator.git",        dest: "costCalculator" }
     - { repo: "https://github.com/jphaugla/nextEcommerce.git",         dest: "nextEcommerce" }
     - { repo: "https://github.com/jphaugla/azureSQLtoCockroachDB.git", dest: "azureSQLtoCockroachDB" }
-
+  register: git_result
+  retries: 6
+  delay: 10
+  until: git_result is succeeded

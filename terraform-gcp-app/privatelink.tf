@@ -86,37 +86,29 @@ resource "google_compute_forwarding_rule" "crdb_psc" {
 }
 
 ###############################################
-# 5) Optional: Private DNS inside your VPC (simple & plan-safe)
+# 5) Optional: Private DNS inside your VPC (plan-safe keys)
 ###############################################
-# Use for_each driven purely by variables so Terraform can always decide at plan time.
-# We key the map as "zone" so we can reference it deterministically later.
+# Make the for_each keys STATIC so Terraform can always plan,
+# and read the DNS name directly from variables in the body.
+
+# helper local: true iff we want DNS
 locals {
-  # NEW: enable DNS when a non-empty name is provided
-  _dns_name    = trimspace(var.crdb_private_endpoint_dns)
-  _dns_enabled = var.enable_privatelink && length(local._dns_name) > 0
+  _dns_wanted = var.enable_privatelink 
 }
 
 resource "google_dns_managed_zone" "crdb_private_zone" {
-  for_each = local._dns_enabled ? { zone = local._dns_name } : {}
+  # Static key map when enabled; empty map when disabled.
+  for_each = local._dns_wanted ? { zone = true } : {}
 
   name       = replace("${var.project_id}-${var.virtual_network_location}-crdb-priv-zone", "_", "-")
-  dns_name   = endswith(each.value, ".") ? each.value : "${each.value}."
+  # Use the var directly; not from for_each keys/values.
+  dns_name   = endswith(var.crdb_private_endpoint_dns, ".") ? var.crdb_private_endpoint_dns : "${var.crdb_private_endpoint_dns}."
   visibility = "private"
 
   private_visibility_config {
     networks { network_url = google_compute_network.main.self_link }
   }
 }
-
-resource "google_dns_record_set" "crdb_private_a" {
-  for_each     = local._dns_enabled ? { zone = local._dns_name } : {}
-  name         = endswith(each.value, ".") ? each.value : "${each.value}."
-  type         = "A"
-  ttl          = 300
-  managed_zone = google_dns_managed_zone.crdb_private_zone["zone"].name
-  rrdatas      = [google_compute_address.crdb_psc_ip[0].address]
-}
-
 ###############################################
 # 6) Outputs
 ###############################################
