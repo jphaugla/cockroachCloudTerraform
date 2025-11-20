@@ -118,6 +118,7 @@
   ansible.builtin.package:
     name: "{{ _prometheus_selinux_packages }}"
     state: present
+    disablerepo: "pgdg*"
   register: _install_packages
   until: _install_packages is succeeded
   retries: 5
